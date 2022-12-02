@@ -1,0 +1,1152 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"xla",
+				"xlabel"
+			],
+			[
+				"eq",
+				"eq_tot"
+			],
+			[
+				"var",
+				"variables"
+			],
+			[
+				"eq_",
+				"eq_temp_y"
+			],
+			[
+				"spri",
+				"sprintf"
+			],
+			[
+				"add",
+				"add_force"
+			],
+			[
+				"Res",
+				"Results_list"
+			],
+			[
+				"at",
+				"atan2"
+			],
+			[
+				"ad",
+				"add_beam_nodes"
+			],
+			[
+				"add_n",
+				"add_node"
+			],
+			[
+				"no",
+				"nodes_keys"
+			],
+			[
+				"nod",
+				"nodes_keys"
+			],
+			[
+				"fun",
+				"function"
+			],
+			[
+				"spr",
+				"sprintf"
+			],
+			[
+				"coo",
+				"coords"
+			],
+			[
+				"coor",
+				"coord_B"
+			],
+			[
+				"Coo",
+				"Coord_new"
+			],
+			[
+				"c",
+				"coord_B"
+			],
+			[
+				"base",
+				"base_node"
+			],
+			[
+				"Str",
+				"Street_new"
+			],
+			[
+				"St",
+				"Street_new"
+			],
+			[
+				"geo",
+				"geolocate"
+			],
+			[
+				"M",
+				"max_brightness"
+			],
+			[
+				"bli",
+				"blinktime"
+			],
+			[
+				"Lock",
+				"Lock_saved"
+			],
+			[
+				"Up",
+				"Update"
+			],
+			[
+				"u",
+				"update_server"
+			],
+			[
+				"thr",
+				"thread"
+			],
+			[
+				"che",
+				"Checking"
+			],
+			[
+				"up",
+				"update_colour"
+			],
+			[
+				"upd",
+				"update_colour"
+			],
+			[
+				"time",
+				"time_saved"
+			],
+			[
+				"C",
+				"C_index"
+			],
+			[
+				"chec",
+				"check_server"
+			],
+			[
+				"tim",
+				"time_checked"
+			],
+			[
+				"ch",
+				"check_delay"
+			],
+			[
+				"ba",
+				"Base_url"
+			],
+			[
+				"turn_",
+				"turn_on"
+			],
+			[
+				"if",
+				"ifmain\tif __name__ == '__main__'"
+			],
+			[
+				"p",
+				"pixels"
+			],
+			[
+				"set",
+				"set_hsv"
+			],
+			[
+				"colo",
+				"colorsys"
+			],
+			[
+				"hsv",
+				"hsv_to_rgb"
+			],
+			[
+				"se",
+				"set_rgb"
+			],
+			[
+				"de",
+				"def"
+			],
+			[
+				"js",
+				"jason_values"
+			],
+			[
+				"Json",
+				"Json_values"
+			],
+			[
+				"hsv_to",
+				"hsv_to_hex"
+			],
+			[
+				"sta",
+				"start_colour"
+			],
+			[
+				"rq",
+				"rq_character"
+			],
+			[
+				"jso",
+				"jason_values"
+			],
+			[
+				"re",
+				"reset_delay"
+			],
+			[
+				"rese",
+				"reset_delay"
+			],
+			[
+				"sto",
+				"stopped_return"
+			],
+			[
+				"change",
+				"change_Ambilight"
+			],
+			[
+				"chag",
+				"change_monitor"
+			],
+			[
+				"run",
+				"run_ambilight_button"
+			],
+			[
+				"Ambi",
+				"Ambilight"
+			],
+			[
+				"Am",
+				"Ambilight"
+			],
+			[
+				"A",
+				"Ambilight"
+			],
+			[
+				"chan",
+				"change_monitor"
+			],
+			[
+				"col",
+				"Colour_saved"
+			],
+			[
+				"co",
+				"colour"
+			],
+			[
+				"average",
+				"average_color"
+			],
+			[
+				"ave",
+				"average_color"
+			],
+			[
+				"Int",
+				"Interface_output"
+			],
+			[
+				"out",
+				"Output_premiere"
+			],
+			[
+				"pi",
+				"pix_new"
+			],
+			[
+				"Pi",
+				"pix_new"
+			],
+			[
+				"pix",
+				"pix_new"
+			],
+			[
+				"Fr",
+				"Frame_old"
+			],
+			[
+				"Li",
+				"Light_pixels"
+			],
+			[
+				"Ligh",
+				"Light_pixels"
+			],
+			[
+				"setup",
+				"setup_video"
+			],
+			[
+				"ren",
+				"render_test"
+			],
+			[
+				"turn",
+				"turn_off"
+			],
+			[
+				"li",
+				"listener"
+			],
+			[
+				"__",
+				"__init__"
+			],
+			[
+				"x_",
+				"x_min"
+			],
+			[
+				"zoo",
+				"zoom_slider"
+			],
+			[
+				"zoom",
+				"zoom_old_val"
+			],
+			[
+				"Light",
+				"Light_titles"
+			],
+			[
+				"Sel",
+				"Select_region"
+			],
+			[
+				"on",
+				"On_button"
+			],
+			[
+				"Se",
+				"Select_region"
+			],
+			[
+				"L",
+				"Light_data"
+			],
+			[
+				"sel",
+				"selected"
+			],
+			[
+				"sele",
+				"selected"
+			],
+			[
+				"tot",
+				"tot_lines"
+			],
+			[
+				"Sele",
+				"Select_B"
+			],
+			[
+				"to",
+				"tot_lines"
+			],
+			[
+				"cr",
+				"scroll_slider"
+			],
+			[
+				"Con",
+				"Control_class"
+			],
+			[
+				"main",
+				"main_class"
+			],
+			[
+				"x",
+				"x_min"
+			],
+			[
+				"clas",
+				"class"
+			],
+			[
+				"To",
+				"Total_length"
+			],
+			[
+				"medi",
+				"media_player"
+			],
+			[
+				"med",
+				"media_player"
+			],
+			[
+				"N_",
+				"N_Nodes"
+			],
+			[
+				"vM",
+				"vmaxnorm3"
+			],
+			[
+				"N_n",
+				"N_Nodes"
+			],
+			[
+				"Bu",
+				"Bulbs_ips"
+			],
+			[
+				"Bul",
+				"Bulbs_ips"
+			],
+			[
+				"auto",
+				"automaton"
+			],
+			[
+				"pro",
+				"prod_nr"
+			],
+			[
+				"pr",
+				"priority"
+			],
+			[
+				"au",
+				"automaton"
+			],
+			[
+				"produ",
+				"product_list"
+			],
+			[
+				"produc",
+				"product_list"
+			],
+			[
+				"tu",
+				"tuple_type"
+			],
+			[
+				"tupl",
+				"tuple_type"
+			],
+			[
+				"ty",
+				"tuple_type"
+			],
+			[
+				"aut",
+				"automaton"
+			],
+			[
+				"Re",
+				"result"
+			],
+			[
+				"ca",
+				"bank_card"
+			],
+			[
+				"ban",
+				"bank_card"
+			],
+			[
+				"te",
+				"Teacher"
+			],
+			[
+				"an",
+				"answ_quest"
+			],
+			[
+				"An",
+				"Answering"
+			],
+			[
+				"inc",
+				"incorrect"
+			],
+			[
+				"a",
+				"a_heater"
+			],
+			[
+				"wind",
+				"window_open"
+			],
+			[
+				"autom",
+				"automaton"
+			],
+			[
+				"svg",
+				"svgin"
+			],
+			[
+				"U",
+				"u_toggle"
+			],
+			[
+				"automa",
+				"automaton"
+			],
+			[
+				"v_m",
+				"v_max_1"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/LaTeXBox/support/LaTeX.sublime-build",
+					""
+				],
+				[
+					"Packages/LaTeXBox/support/LaTeX.sublime-build",
+					"Force"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					""
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Traditional"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"PdfLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"XeLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"LuaLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder - PdfLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder - XeLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder - LuaLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Script Builder"
+				]
+			],
+			[
+				"Packages/LaTeXBox/support/LaTeX.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					""
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Traditional"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"PdfLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"XeLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"LuaLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder - PdfLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder - XeLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Basic Builder - LuaLaTeX"
+				],
+				[
+					"Packages/LaTeXTools/LaTeX.sublime-build",
+					"Script Builder"
+				]
+			],
+			[
+				"Packages/LaTeXTools/LaTeX.sublime-build",
+				"Traditional"
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"auto",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"Auto",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"vmen",
+				"View: Toggle Menu"
+			],
+			[
+				"PackageRe",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"PackageRes",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Snippet: ",
+				"Snippet: cif"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"packagedec",
+				"PackageDev: Convert to YAML and Rearrange Syntax Definition"
+			],
+			[
+				"scope",
+				"Selection: Expand to Scope"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Add Channel"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"package control",
+				"Package Control: Discover Packages"
+			],
+			[
+				"Package Control: insta",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package",
+				"PackageDev: Create Package"
+			],
+			[
+				"Packagedev",
+				"PackageDev: Create Package"
+			],
+			[
+				"instaal",
+				"Package Control: Install Package"
+			],
+			[
+				"packagedev",
+				"PackageDev: New Syntax Definition"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"view",
+				"View: Toggle Status Bar"
+			],
+			[
+				"",
+				"Arithmetic"
+			],
+			[
+				"menu",
+				"View: Toggle Menu"
+			],
+			[
+				"matlab",
+				"AutoMatlab: Open command panel"
+			],
+			[
+				"automatlab ",
+				"AutoMatlab: Run file"
+			],
+			[
+				"aut",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"autore",
+				"Disable Autorefresh"
+			],
+			[
+				"refresh",
+				"Enable Autorefresh"
+			],
+			[
+				"autos",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"Aut",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"ardui",
+				"Set Syntax: Arduino"
+			],
+			[
+				"pack",
+				"Package Control: Disable Package"
+			],
+			[
+				"autosave",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"auyo",
+				"Toggle AutoSave: current file only"
+			],
+			[
+				"autosa",
+				"Toggle AutoSave: all files"
+			],
+			[
+				"Hex",
+				"HexViewer: Toggle Hex View"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"git",
+				"Sublime Merge: File History"
+			],
+			[
+				"au",
+				"Toggle AutoSave: current file only"
+			],
+			[
+				"late",
+				"Build With: LaTeX - Traditional"
+			],
+			[
+				"latex",
+				"Build With: LaTeX - Traditional"
+			],
+			[
+				"package controll",
+				"Package Control: Disable Package"
+			],
+			[
+				"Latex",
+				"LaTeXTools: View PDF"
+			],
+			[
+				"latext",
+				"Build With: LaTeX - Traditional"
+			],
+			[
+				"build with",
+				"Build With: LaTeX - Traditional"
+			],
+			[
+				"l",
+				"LaTeXTools: Check system"
+			],
+			[
+				"packag",
+				"Preferences: Browse Packages"
+			],
+			[
+				"latextool",
+				"LaTeXTools: Check system"
+			],
+			[
+				"Install Package Control",
+				"Install Package Control"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 157.0,
+		"history":
+		[
+			"sublime.log_commands(True)",
+			"new.py",
+			"cd /d d:\\\\python3.6",
+			"Test"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/D/Workspace/Matlab Cloud/Mechanical Design project"
+	],
+	"file_history":
+	[
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/Pool_plot.m",
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/Beam_class.m",
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/System_calc.m",
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/Prototype.m",
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/Triangle.m",
+		"/D/Python3.6/Love_Light/main.py",
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/Paralellogram.m",
+		"/D/Workspace/University/Year 3/VIS-Group44/Template/jbi100_app/views/menu.py",
+		"/D/Workspace/University/Year 3/VIS-Group44/Template/jbi100_app/views/scatterplot.py",
+		"/D/Workspace/University/Year 3/VIS-Group44/Template/app.py",
+		"/D/Workspace/University/Year 3/VIS-Group44/Template/jbi100_app/main.py",
+		"/D/Workspace/Matlab Cloud/Combustion Engine (Group 008)/Main_ideal_Final.m",
+		"/D/Workspace/Matlab Cloud/Combustion Engine (Group 008)/Functions/Data_engine.m",
+		"/D/Workspace/Matlab Cloud/Mechanical Design project/Class.m",
+		"/F/Restaurant.py",
+		"/D/Python3.6/Love_Light/Flask/static/color-picker.min.css",
+		"/D/downloads/color-picker-main/color-picker-main/index.html",
+		"/D/Python3.6/Love_Light/Raspberry pi.py",
+		"/D/Python3.6/Love_Light/Test.py",
+		"/D/Python3.6/Love_Light/Test2.py",
+		"/D/Workspace/University/Year 3/VIS-Group44/Lon_Lat.py",
+		"/D/Python3.6/python_run_file.ahk",
+		"/D/Workspace/University/Year 3/VIS-Group44/AirBnB/explore_airbnb_data.ipynb",
+		"/D/Python3.6/Love_Light/Interaction.py",
+		"/D/Python3.6/Love_Light/secrets.py",
+		"/D/Python3.6/Love_Light/Remove.py",
+		"/D/Python3.6/Love_Light/Colour.py",
+		"/D/Python3.6/Love_Light/Plant.py",
+		"/D/Python3.6/Love_Light/Light.py",
+		"/F/Test.py",
+		"/F/code.py",
+		"/D/Workspace/Matlab/matlab_run_file.ahk",
+		"/D/Python3.6/yeelight/Interface.py",
+		"/D/Python3.6/Love_Light/Flask.py",
+		"/D/Python3.6/Script/Yeelight.py",
+		"/D/Python3.6/Script/Test.py",
+		"/D/Python3.6/Script/Light.py",
+		"/D/Python3.6/test/test1.py",
+		"/D/Python3.6/test/test.py",
+		"/D/Python3.6/test/Lights.py",
+		"/D/Python3.6/Lib/site-packages/jedi/third_party/typeshed/stdlib/2and3/colorsys.pyi",
+		"/D/downloads/neopixels_red/Getting_Started_With_Raspberry_Pi_Pico/neopixels_red/CircuitPython 8.x/code.py",
+		"/D/Python3.6/Love Light/Test.py",
+		"/D/Workspace/University/Year 3/110_bertels_dekker_smeets-1dh/plant-io.cif",
+		"/D/Python3.6/yeelight/Example.py",
+		"/D/Python3.6/yeelight/Video_creation.py",
+		"/D/Python3.6/Lib/site-packages/python_vlc_http/vlc.py",
+		"/D/Python3.6/yeelight/Runback.py",
+		"/D/Python3.6/yeelight/Editor.py",
+		"/D/Python3.6/yeelight/vlc_test.py",
+		"/D/Python3.6/yeelight/Testmp4.py",
+		"/D/Python3.6/GIF_Generator/Create.py",
+		"/D/Python3.6/yeelight/Light_data/Alice By Heart - Off-Broadway (expanded ending) (2019) (English softsubs)_mkv.pkl",
+		"/D/Python3.6/Letterboxd-sorter/LB_colour.py",
+		"/D/Workspace/Matlab/4MC10/Student progress test 1/Functions/system_matrix_D0N0.m",
+		"/D/Python3.6/yeelight/vlc_http.py",
+		"/D/Media/Musicals/Dear Evan Hansen (supercut)/DEH EDIT ACT 1.mp4",
+		"/D/Python3.6/yeelight/Test.py",
+		"/D/Python3.6/Lib/site-packages/vlc_ctrl/player.py",
+		"/D/downloads/Question 1/plot_for_meshes_thick.m",
+		"/D/downloads/Question 1/plot_for_meshes_slender.m",
+		"/D/downloads/Question 1/Data_test.m",
+		"/D/Python3.6/yeelight/Test_threads.py",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/09-func-stochastics/1-priority-queue-Essential/queue.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/08-scalable-reuse-2/2-three-servers-3/three-servers2.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/07-types-values-2/1-generalized-fifo-buffer-Essential/FIFO.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/07-types-values-2/2-two-buffers-1-Essential/Generator.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/08-scalable-reuse-2/1-manufacturing-process-2-Essential/manufact-process.cif",
+		"/D/downloads/plot_next_to.m",
+		"/D/downloads/plot_for_meshes.m",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/07-types-values-2/1-generalized-fifo-buffer-Essential/answer/buffer-black-white-fifo.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/06-channels/4-atm-and-bank-Essential/atm.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/06-channels/1-classroom-Essential/classroom.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/Quizzes/quiz1.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/03-lamp-Essential/lamp.svg",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/3-heater-window-system/hw-manual-plant.tooldef",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/3-heater-window-system/hw-manual.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/3-heater-window-system/hw-ctrl.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/3-heater-window-system/hw-ctrl-io.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/3-heater-window-system/hw-plant.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/3-heater-window-system/hw-plant-io.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/1-double-sliding-doors/sd-ctrl-io.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/1-double-sliding-doors/sd-ctrl.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/1-double-sliding-doors/sd-svg.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/1-double-sliding-doors/sd-plant.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/1-double-sliding-doors/sd-plant-io.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05a-MBSE/1-double-sliding-doors/sd-plant-ctrl.tooldef",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/08-bouncing-ball-2/bouncingball2-template.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/09-race/race.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/test.tooldef",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/08-bouncing-ball-2/answer/bouncingball2-svg.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/08-bouncing-ball-2/answer/bouncingball2.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/06-pusher-with-visualisation-Essential/pusher2-svg-template.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/09-race/answer/race.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/06-pusher-with-visualisation-Essential/pusher2-template.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/06-pusher-with-visualisation-Essential/pusher.svg",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/04-conveyer-Essential/answer/conveyer-button-svg.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/05-pusher-Essential/answer/pusher.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/05-pusher-Essential/pusher-template.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/05-pusher-Essential/pusher.tooldef",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/04-conveyer-Essential/answer/conveyer-button.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/03-lamp-Essential/answer/clickable-lamp.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/04-conveyer-Essential/Conveyer.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/04-conveyer-Essential/answer/conveyer.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/03-lamp-Essential/lamp.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/04-scalable-reuse-1/3-bouncing-ball-1/bounce.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/01-coffee-machine-Essential/answer/coffee-machine.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/05-time/01-coffee-machine-Essential/coffe.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/04-scalable-reuse-1/3-bouncing-ball-1/answer/bouncingball1.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/03-data/1-referee-1/referee.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/03-data/6-three-servers-1/answer/three-servers.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/04-scalable-reuse-1/1-referee-2/answer/referee2.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/04-scalable-reuse-1/1-referee-2/referee.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/03-data/1-referee-1/answer/referee.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/03-data/3-manufacturing-process-Essential/controller1.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/03-data/2-parent-and-child/ask-template.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/02-types-values-1/2-integers-and-reals-Essential/int-or-real.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/02-types-values-1/1-operations-Essential/operations.cif",
+		"/D/Workspace/Eclipse/exercises.zip_expanded/02-types-values-1/1-operations-Essential/answer/results-operations.cif",
+		"/C/Users/coenc/AppData/Roaming/Sublime Text 3/Packages/Python/Comments.tmPreferences",
+		"/C/Users/coenc/AppData/Roaming/Sublime Text 3/Packages/Matlab/Comments.tmPreferences",
+		"/D/Python3.6/Goodreads/Test.py",
+		"/D/Python3.6/Goodreads/grab_convert_from_libgen/search.py",
+		"/D/Python3.6/Vacation/client_secret.json",
+		"/D/Program Files/Sublime Text 3/Packages/Python.sublime-package",
+		"/D/Program Files/Sublime Text 3/Packages/Color Scheme - Default.sublime-package",
+		"/C/Users/coenc/AppData/Roaming/Sublime Text 3/Packages/User/GinRummyLog.sublime-syntax",
+		"/C/Users/coenc/AppData/Roaming/Sublime Text 3/Packages/User/CIF.sublime-syntax"
+	],
+	"find":
+	{
+		"height": 23.2
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"System",
+			"Rho_L"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.2
+	},
+	"input":
+	{
+		"height": 36.8
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 28.8
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.hex_viewer_inspector":
+	{
+		"height": 126.0
+	},
+	"output.latextools":
+	{
+		"height": 31.0
+	},
+	"output.mdpopups":
+	{
+		"height": 0.0
+	},
+	"output.package_dev":
+	{
+		"height": 108.0
+	},
+	"output.stino_build_panel":
+	{
+		"height": 132.0
+	},
+	"output.stino_panel":
+	{
+		"height": 132.0
+	},
+	"pinned_build_system": "",
+	"project": "Vis.sublime-project",
+	"replace":
+	{
+		"height": 43.2
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"D:\\Workspace\\Matlab\\4MC10\\Exercises.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 296.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"\n"
+			]
+		],
+		"width": 592.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 50.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
