@@ -13,6 +13,14 @@ body {
     margin: 0px;
 }
 
+#btn-switch{
+    position: absolute;
+    bottom: 2%; /*your button position*/
+    right: 50%;
+    z-index: 1;
+    color: white;
+}
+
 #left-column {
     padding: 20px 2rem;
     display: flex;
@@ -40,7 +48,7 @@ h5 {
     font-weight: 300;
 }
 
-#intro {
+.intro {
     margin: 20px 0px;
     text-align: justify;
 }
@@ -50,11 +58,7 @@ h5 {
 }
 
 .graph_card {
-    background-color: white;
-    border-radius: 0.675rem;
-    padding: 1rem;
-    margin: auto;
-    margin-top: 20px;
+/*    position: relative;*/
 }
 
 .graph_card h6 {
