@@ -2,33 +2,29 @@ from dash import dcc, html
 
 
 def generate_description_card():
-    """
-
-    :return: A Div containing dashboard title & descriptions.
-    """
     return html.Div(
         id="description-card",
         children=[
             html.H5("Visualisation tool"),
             html.H4("Group 44"),
             html.Div(
-                id="intro",
+                className="intro",
                 children="This is a work in progress",
             ),
+            # html.H3("Test", id='bounds')
         ],
     )
 
 
 def generate_control_card():
-    """
-
-    :return: A Div containing controls for graphs.
-    """
     return html.Div(
         id="control-card",
         children=[
             html.Hr(),
-            html.H4("Controls")
+            html.H4("Controls"),
+            html.Div(className='btn-wrapper',children=[
+                    html.Button('Advanced', id='btn-controls', n_clicks=0),
+                ])
         ], style={"textAlign": "float-left"}
     )
 

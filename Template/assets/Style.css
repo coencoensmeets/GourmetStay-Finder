@@ -13,6 +13,28 @@ body {
     margin: 0px;
 }
 
+hr {
+    margin-top:10px;
+}
+
+#btn-switch{
+    position: absolute;
+    z-index: 1;
+    color: white;
+    bottom:2%;
+}
+.btn-wrapper{
+    top:98%;
+    bottom: 2%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#ctrl_adv{
+    margin: 10px;
+}
+
 #left-column {
     padding: 20px 2rem;
     display: flex;
@@ -40,7 +62,7 @@ h5 {
     font-weight: 300;
 }
 
-#intro {
+.intro {
     margin: 20px 0px;
     text-align: justify;
 }
@@ -50,11 +72,7 @@ h5 {
 }
 
 .graph_card {
-    background-color: white;
-    border-radius: 0.675rem;
-    padding: 1rem;
-    margin: auto;
-    margin-top: 20px;
+/*    position: relative;*/
 }
 
 .graph_card h6 {

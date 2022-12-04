@@ -1,59 +1,147 @@
-from jbi100_app.main import app
-from jbi100_app.views.menu import make_menu_layout
-from jbi100_app.views.scatterplot import Scatterplot
-
+import dash
+from dash import dcc
 from dash import html
-import plotly.express as px
+from def_class.menu import make_menu_layout
+import def_class.Middle as Map
+from def_class.Output import make_output_layout
+
 from dash.dependencies import Input, Output
-import pandas as pd
+import json
+
+class Save_data():
+	def __init__(self):
+		self.Data = []
+		self.n_clicked = 0
+		self.n_clicked_ctrl = 0
+
+	def update_hover(self, data):
+		self.Data = data
+
+	def update_clicked(self, n=1):
+		self.n_clicked +=n
+
+	def update_clicked_ctrl(self, n=1):
+		self.n_clicked_ctrl +=n
 
 
 if __name__ == '__main__':
-	# Create data
-	df = px.data.iris()
+	app = dash.Dash(__name__)
+	app.title = "Group 44"
+	Map_data = Map.Map()
 
-	# Instantiate custom views
-	scatterplot1 = Scatterplot("Scatterplot 1", 'sepal_length', 'sepal_width', df)
-	scatterplot2 = Scatterplot("Scatterplot 2", 'petal_length', 'petal_width', df)
-
+	Data_saved = Save_data()
+	
 	app.layout = html.Div(
 		id="app-container",
 		children=[
 			# Left column
 			html.Div(
+
 				id="left-column",
-				className="three columns",
+				className="two columns",
 				children=make_menu_layout()
 			),
 
-			# Right column
+			# Middle column
 			html.Div(
+				id="middle-column",
+				className="eight columns",
+				children=Map_data.html_div
+			),
+
+			html.Div(
+
 				id="right-column",
-				className="nine columns",
-				children=[
-					scatterplot1,
-					scatterplot2
-				],
+				className="two columns",
+				children=make_output_layout()
 			),
 		],
 	)
 
-	# Define interactions
-	@app.callback(
-		Output(scatterplot1.html_id, "figure"), [
-		Input("select-color-scatter-1", "value"),
-		Input(scatterplot2.html_id, 'selectedData')
-	])
-	def update_scatter_1(selected_color, selected_data):
-		return scatterplot1.update(selected_color, selected_data)
+#------INTERACTIONS-------
+	#-Switch between restaurants and airbnbs---
+	@app.callback([
+		Output(component_id ='map', component_property='children'),
+		Output('btn-switch', 'children'),
+		Output('btn-switch', 'style'),
+		Output('data_showing', 'children'),],
+		Input('btn-switch', 'n_clicks'),
+		)
+	def update_map(N):
+		print(N)
 
-	@app.callback(
-		Output(scatterplot2.html_id, "figure"), [
-		Input("select-color-scatter-2", "value"),
-		Input(scatterplot1.html_id, 'selectedData')
-	])
-	def update_scatter_2(selected_color, selected_data):
-		return scatterplot2.update(selected_color, selected_data)
+		if N!= Data_saved.n_clicked and N!=0:
+			Test = Map_data.switch()
+			Data_saved.update_clicked()
+		else:
+			Test = Map_data.update()
 
+		if Map_data.Show =='Restaurants':
+			output_btn = "Show AirBnBs"
+			style = {'border-color':'black',
+				'color':'black'}
+		else:
+			output_btn = "Show Restaurants"
+			style = {'border-color':'white',
+				'color':'white'}
+		return Test, output_btn, style,Map_data.Show
+
+	#Switch advanced<->map
+	@app.callback(
+		[Output('map_div', 'style'),
+		Output('ctrl_div', 'style')],
+		[Input('btn-controls', 'n_clicks')])
+	def switch_map_advanced(N):
+		if N!= Data_saved.n_clicked_ctrl and N!=0:
+			print("Clicked")
+			Data_saved.update_clicked_ctrl()
+		else:
+			print("Not clicked")
+
+		if Data_saved.n_clicked_ctrl%2 ==0:
+			Output = [{'display': 'block'}, {'display': 'none'}]
+		else:
+			Output = {'display': 'none'}, {'display': 'block'}
+		return (*Output,)		
+
+	#---Get amount of Airbnbs in region---
+	@app.callback(
+		Output('Nairbnb', 'children'),
+		Input('map', 'bounds'),
+		)
+	def update_bounds(bounds):
+		Count = Map.N_airbnbs(Map_data,bounds)
+		return "Airbnbs in visible region: {}".format(Count)
+
+	#---Data overing over marker---
+	@app.callback([Output("bounds", "children"), Output('tooltip', 'children')], [Input("markers", "hover_feature")])
+	def update_tooltip(feature):
+		if feature is None:
+			return Data_saved.Data,None
+		elif feature['properties']['cluster']==True:
+			return Data_saved.Data, [html.P('#N={}'.format(feature['properties']['point_count']))]
+		elif Map_data.Show=='Restaurants':
+			Output = [
+			html.P("Name: {}".format(str(feature['properties']['DBA']).lower())),
+			html.P("Score: {}".format(feature['properties']['SCORE'])),
+			html.P("Cuisine: {}".format(feature['properties']['CUISINE DESCRIPTION'])),
+			html.A(href = "https://www.google.com/search?q={} {} {} NYC".format(
+					feature['properties']['DBA'],
+					feature['properties']['BUILDING'],
+					feature['properties']['STREET']).lower()
+				,children=[
+			html.Button("Google")
+			])]
+			# print(feature)
+			Data_saved.update_hover(Output)
+			return Data_saved.Data, Data_saved.Data[0:3]
+		else:
+			Output = [
+			html.P("Name: {}".format(str(feature['properties']['NAME']).lower())),
+			html.P("Price: {}".format(feature['properties']['price'])),
+			html.P("Rating: {}".format(feature['properties']['review rate number']))
+			]
+			Data_saved.update_hover(Output)
+			return Data_saved.Data, Data_saved.Data[0:3]
 
 	app.run_server(debug=False, dev_tools_ui=False)
