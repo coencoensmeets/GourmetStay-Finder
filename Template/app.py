@@ -13,6 +13,7 @@ class Save_data():
 		self.Data = []
 		self.n_clicked = 0
 		self.n_clicked_ctrl = 0
+		self.bounds = [[40.43754064484924, -74.42687988281251], [40.961752415773866, -73.57337951660158]]
 
 	def update_hover(self, data):
 		self.Data = data
@@ -22,6 +23,9 @@ class Save_data():
 
 	def update_clicked_ctrl(self, n=1):
 		self.n_clicked_ctrl +=n
+
+	def update_bounds(self, bound):
+		self.bounds = bound
 
 
 if __name__ == '__main__':
@@ -59,22 +63,31 @@ if __name__ == '__main__':
 	)
 
 #------INTERACTIONS-------
-	#-Switch between restaurants and airbnbs---
+	#-Switch between restaurants and airbnbs & Number of airbnbs+minimap---
 	@app.callback([
 		Output(component_id ='map', component_property='children'),
 		Output('btn-switch', 'children'),
 		Output('btn-switch', 'style'),
-		Output('data_showing', 'children'),],
+		Output('data_showing', 'children'),
+		Output('mini-map', 'children'),
+		Output('Nairbnb', 'children'),
+		],[
 		Input('btn-switch', 'n_clicks'),
+		Input('map', 'bounds'),]
 		)
-	def update_map(N):
+	def update_map(N, bounds):
 		print(N)
+		print(bounds)
 
 		if N!= Data_saved.n_clicked and N!=0:
 			Test = Map_data.switch()
 			Data_saved.update_clicked()
 		else:
 			Test = Map_data.update()
+
+		Mini = Map_data.update_bounds_mini(bounds)
+		Count = Map.N_airbnbs(Map_data,bounds)
+		N_airbnb = "Airbnbs in visible region: {}".format(Count)
 
 		if Map_data.Show =='Restaurants':
 			output_btn = "Show AirBnBs"
@@ -84,7 +97,7 @@ if __name__ == '__main__':
 			output_btn = "Show Restaurants"
 			style = {'border-color':'white',
 				'color':'white'}
-		return Test, output_btn, style,Map_data.Show
+		return Test, output_btn, style,Map_data.Show, Mini, N_airbnb
 
 	#Switch advanced<->map
 	@app.callback(
@@ -103,15 +116,6 @@ if __name__ == '__main__':
 		else:
 			Output = {'display': 'none'}, {'display': 'block'}
 		return (*Output,)		
-
-	#---Get amount of Airbnbs in region---
-	@app.callback(
-		Output('Nairbnb', 'children'),
-		Input('map', 'bounds'),
-		)
-	def update_bounds(bounds):
-		Count = Map.N_airbnbs(Map_data,bounds)
-		return "Airbnbs in visible region: {}".format(Count)
 
 	#---Data overing over marker---
 	@app.callback([Output("bounds", "children"), Output('tooltip', 'children')], [Input("markers", "hover_feature")])

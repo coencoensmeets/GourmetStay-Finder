@@ -53,12 +53,23 @@ class Map():
 
 		map_data = self.update()
 
+		polygon = dl.Polygon(color="#ff7800", weight=1, positions=[[40.43963107298772,-74.21127319335939], [40.43963107298772,-73.7889862060547], [40.95967830900992,-73.7889862060547], 
+											[40.95967830900992,-74.21127319335939], [40.43963107298772,-74.21127319335939]])
+		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
+		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
+
 		self.html_div =  [
 			html.Div(
 				id='map_div',
 				style={'display': 'block'},
 				className="graph_card",
 				children=[
+					dl.Map(children=[
+						dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
+						self.inner_ring
+						# dl.GestureHandling(),#Adds ctrl to zoom,
+					], center=(40.7, -74), zoom=8, style={'border-width': '5px','border-style':'solid','border-color':'#f9f9f9','top':"80%",'width': '20%', 'height': '20%', 'display': 'inline-block', 'position': 'absolute', 'z-index': '1000'}, id='mini-map'),
+
 					dl.Map(children=[
 						dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
 						# dl.GestureHandling(),#Adds ctrl to zoom
@@ -103,3 +114,10 @@ class Map():
 							superClusterOptions={"radius": 400,"minPoints":20},
 							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),]
 		
+	def update_bounds_mini(self,bounds):
+		polygon = dl.Polygon(color="#ff7800", weight=1, positions=[[bounds[0][0],bounds[0][1]], [bounds[0][0],bounds[1][1]], [bounds[1][0],bounds[1][1]], 
+											[bounds[1][0],bounds[0][1]], [bounds[0][0],bounds[0][1]]])
+		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
+		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
+		return [dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
+						self.inner_ring]
