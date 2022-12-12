@@ -1,5 +1,4 @@
 import dash
-import dash_leaflet as dl
 from dash import dcc
 from dash import html
 from def_class.menu import make_menu_layout
@@ -26,6 +25,7 @@ class Save_data():
 		self.n_clicked_ctrl +=n
 
 	def update_hover_feature(self, feature):
+		print("Updated: {}".format(feature))
 		self.feature = feature
 
 if __name__ == '__main__':
@@ -76,9 +76,6 @@ if __name__ == '__main__':
 		Input('map', 'bounds'),]
 		)
 	def update_map(N, bounds):
-		print(N)
-		print(bounds)
-
 		if N!= Data_saved.n_clicked and N!=0:
 			Map_data_list = Map_data.switch()
 			Data_saved.update_clicked()
@@ -93,19 +90,16 @@ if __name__ == '__main__':
 			output_btn = "Show AirBnBs"
 			style = {'border-color':'black',
 				'color':'black'}
+			feature = Data_saved.feature
+			if bool(feature):
+				if not feature['properties']['cluster']:
+					geojsonlast = Map.get_house_data(feature)
+					Map_data_list.append(geojsonlast)
 
 		else:
 			output_btn = "Show Restaurants"
 			style = {'border-color':'white',
 				'color':'white'}
-#Added buggy code by Jakob, Coen will look into it, also a segment in Middle.py lines 41-45
-#			feature = Data_saved.feature
-#			if bool(feature):
-#				if not feature['properties']['cluster']:
-#					geojsonlast = Map.get_house_data(feature)
-#					print("test",geojsonlast)
-#					geojson_data = dl.GeoJSON(data=geojsonlast, zoomToBounds=True)
-#					Map_data_list.append(geojson_data)
 
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
@@ -130,7 +124,6 @@ if __name__ == '__main__':
 	#---Data overing over marker---
 	@app.callback([Output("bounds", "children"), Output('tooltip', 'children')], [Input("markers", "hover_feature")])
 	def update_tooltip(feature):
-		print(feature)
 		if feature is None:
 			return Data_saved.Data,None
 		elif feature['properties']['cluster']==True:

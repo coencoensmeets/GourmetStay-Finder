@@ -4,6 +4,7 @@ from dash import dcc
 from dash import html
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
+from dash_extensions.javascript import assign
 import time
 
 
@@ -23,7 +24,7 @@ def import_restaurants():
 
 def import_airbnb():
 	data = pd.read_csv('airbnb_open_data.csv')
-	data =data[1:5000] #Line only for testing to save time
+	data = data[1:5000] #Line only for testing to save time
 	data = data[data['long'].notna()]
 	data = data[data['lat'].notna()]
 	data = data.drop_duplicates(subset=['long', 'lat'], keep='last')
@@ -37,12 +38,19 @@ def df_to_geobuf(df, long):
 	geobuf = dlx.geojson_to_geobuf(geojson)  # convert to geobuf
 	print("Time elapsed: {}".format(time.perf_counter()-T_start))
 	return geobuf
-#Goes together with the buggy part in app.py lines 101-108
-#def get_house_data(feature):
-#	features = [dict(name=feature['properties']['NAME'], lat=feature['geometry']['coordinates'][0], lon=feature['geometry']['coordinates'][1])]
-#	# Generate geojson with a marker for each country and name as tooltip.
-#	geojsonhouse = dlx.dicts_to_geojson([{**feat, **dict(tooltip=feat['name'])} for feat in features])
-#	return geojsonhouse
+
+# #Goes together with the buggy part in app.py lines 101-108
+def get_house_data(feature):
+	features = [dict(name=feature['properties']['NAME'], lat=feature['geometry']['coordinates'][1], lon=feature['geometry']['coordinates'][0])]
+	# Generate geojson with a marker for each country and name as tooltip.
+	print(features)
+	geojsonhouse = dlx.dicts_to_geojson([{**feat, **dict(tooltip=feat['name'])} for feat in features])
+	draw_flag = assign("""function(feature, latlng){
+	const flag = L.icon({iconUrl: `https://i.pinimg.com/originals/b3/cc/d5/b3ccd57b054a73af1a0d281265b54ec8.jpg`, iconSize: [64, 48]});
+	return L.marker(latlng, {icon: flag});
+	}""")
+	geojson_data = dl.GeoJSON(data=geojsonhouse, options=dict(pointToLayer=draw_flag),zoomToBounds=True)
+	return geojson_data
 
 class Map():
 	"""docstring for Map"""
