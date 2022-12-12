@@ -38,6 +38,10 @@ def df_to_geobuf(df, long):
 	print("Time elapsed: {}".format(time.perf_counter()-T_start))
 	return geobuf
 
+# def get_house_data(feature):
+# 	pass
+# 	return geojson_data
+
 class Map():
 	"""docstring for Map"""
 	def __init__(self):
@@ -71,7 +75,7 @@ class Map():
 					], center=(40.7, -74), zoom=8, style={'border-width': '5px','border-style':'solid','border-color':'#f9f9f9','top':"80%",'width': '20%', 'height': '20%', 'display': 'inline-block', 'position': 'absolute', 'z-index': '1000'}, id='mini-map'),
 
 					dl.Map(children=[
-						dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
+						dl.TileLayer(url=self.url, maxZoom=20, minZoom=10,attribution=self.attribution),
 						# dl.GestureHandling(),#Adds ctrl to zoom
 						dl.GeoJSON(data=self.Data, format="geobuf",cluster=True, id="markers", zoomToBoundsOnClick=True,
 									superClusterOptions={"radius": 400,"minPoints":20},
@@ -108,7 +112,7 @@ class Map():
 
 	def update(self):
 		return [
-				dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
+				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
 				# dl.GestureHandling(),#Adds ctrl to zoom
 				dl.GeoJSON(data=self.Data, format="geobuf",cluster=True, id="markers", zoomToBoundsOnClick=True,
 							superClusterOptions={"radius": 400,"minPoints":20},

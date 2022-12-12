@@ -13,7 +13,7 @@ class Save_data():
 		self.Data = []
 		self.n_clicked = 0
 		self.n_clicked_ctrl = 0
-		self.bounds = [[40.43754064484924, -74.42687988281251], [40.961752415773866, -73.57337951660158]]
+		self.feature = {}
 
 	def update_hover(self, data):
 		self.Data = data
@@ -24,9 +24,8 @@ class Save_data():
 	def update_clicked_ctrl(self, n=1):
 		self.n_clicked_ctrl +=n
 
-	def update_bounds(self, bound):
-		self.bounds = bound
-
+	def update_hover_feature(self, feature):
+		self.feature = feature
 
 if __name__ == '__main__':
 	app = dash.Dash(__name__)
@@ -80,10 +79,10 @@ if __name__ == '__main__':
 		print(bounds)
 
 		if N!= Data_saved.n_clicked and N!=0:
-			Test = Map_data.switch()
+			Map_data_list = Map_data.switch()
 			Data_saved.update_clicked()
 		else:
-			Test = Map_data.update()
+			Map_data_list = Map_data.update()
 
 		Mini = Map_data.update_bounds_mini(bounds)
 		Count = Map.N_airbnbs(Map_data,bounds)
@@ -97,7 +96,13 @@ if __name__ == '__main__':
 			output_btn = "Show Restaurants"
 			style = {'border-color':'white',
 				'color':'white'}
-		return Test, output_btn, style,Map_data.Show, Mini, N_airbnb
+
+		# feature = Data_saved.feature
+		# geojson = Map.get_house_dat(feature)
+
+		# geojson_data = dl.GeoJSON(data=geojson, options=dict(pointToLayer=draw_flag), zoomToBounds=True)
+		# Map_data_list.append(geojson_data)
+		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
 	#Switch advanced<->map
 	@app.callback(
@@ -140,6 +145,7 @@ if __name__ == '__main__':
 			Data_saved.update_hover(Output)
 			return Data_saved.Data, Data_saved.Data[0:3]
 		else:
+			Data_saved.update_hover_feature(feature)
 			Output = [
 			html.P("Name: {}".format(str(feature['properties']['NAME']).lower())),
 			html.P("Price: {}".format(feature['properties']['price'])),
