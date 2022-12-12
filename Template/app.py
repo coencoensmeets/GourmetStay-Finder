@@ -1,4 +1,5 @@
 import dash
+import dash_leaflet as dl
 from dash import dcc
 from dash import html
 from def_class.menu import make_menu_layout
@@ -92,16 +93,20 @@ if __name__ == '__main__':
 			output_btn = "Show AirBnBs"
 			style = {'border-color':'black',
 				'color':'black'}
+
 		else:
 			output_btn = "Show Restaurants"
 			style = {'border-color':'white',
 				'color':'white'}
+#Added buggy code by Jakob, Coen will look into it, also a segment in Middle.py lines 41-45
+#			feature = Data_saved.feature
+#			if bool(feature):
+#				if not feature['properties']['cluster']:
+#					geojsonlast = Map.get_house_data(feature)
+#					print("test",geojsonlast)
+#					geojson_data = dl.GeoJSON(data=geojsonlast, zoomToBounds=True)
+#					Map_data_list.append(geojson_data)
 
-		# feature = Data_saved.feature
-		# geojson = Map.get_house_dat(feature)
-
-		# geojson_data = dl.GeoJSON(data=geojson, options=dict(pointToLayer=draw_flag), zoomToBounds=True)
-		# Map_data_list.append(geojson_data)
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
 	#Switch advanced<->map
@@ -125,6 +130,7 @@ if __name__ == '__main__':
 	#---Data overing over marker---
 	@app.callback([Output("bounds", "children"), Output('tooltip', 'children')], [Input("markers", "hover_feature")])
 	def update_tooltip(feature):
+		print(feature)
 		if feature is None:
 			return Data_saved.Data,None
 		elif feature['properties']['cluster']==True:

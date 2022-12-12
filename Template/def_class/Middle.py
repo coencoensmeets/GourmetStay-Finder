@@ -37,10 +37,12 @@ def df_to_geobuf(df, long):
 	geobuf = dlx.geojson_to_geobuf(geojson)  # convert to geobuf
 	print("Time elapsed: {}".format(time.perf_counter()-T_start))
 	return geobuf
-
-# def get_house_data(feature):
-# 	pass
-# 	return geojson_data
+#Goes together with the buggy part in app.py lines 101-108
+#def get_house_data(feature):
+#	features = [dict(name=feature['properties']['NAME'], lat=feature['geometry']['coordinates'][0], lon=feature['geometry']['coordinates'][1])]
+#	# Generate geojson with a marker for each country and name as tooltip.
+#	geojsonhouse = dlx.dicts_to_geojson([{**feat, **dict(tooltip=feat['name'])} for feat in features])
+#	return geojsonhouse
 
 class Map():
 	"""docstring for Map"""
