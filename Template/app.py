@@ -9,35 +9,41 @@ from dash.dependencies import Input, Output
 import numpy as np
 import json
 
+#Saving data throughout the main interactions of the program. 
 class Save_data():
 	def __init__(self):
-		self.Data = []
-		self.n_clicked = 0
-		self.n_clicked_ctrl = 0
-		self.feature = {}
+		self.Data = [] #Hover data (mouse of item)
+		self.n_clicked = 0 #The amount of times the switch button has been clicked
+		self.n_clicked_ctrl = 0 #The amount of times the advanced control button has been clicked
+		self.feature = {} #Last feature that was hovered over
 
-	def update_hover(self, data):
+	def update_hover(self, data): #Updates the hover data
 		self.Data = data
 
-	def update_clicked(self, n=1):
+	def update_clicked(self, n=1): #Updates the click counter for switching maps
 		self.n_clicked +=n
 
-	def update_clicked_ctrl(self, n=1):
+	def update_clicked_ctrl(self, n=1): #Updates the click counter for switching advanced controls
 		self.n_clicked_ctrl +=n
 
-	def update_hover_feature(self, feature):
+	def update_click_feature(self, feature):#Updates the last feature that was hovered over
+		print("Updated: {}".format(feature))
 		self.feature = feature
 
 if __name__ == '__main__':
+	#---Main Setup---
 	app = dash.Dash(__name__)
 	app.title = "Group 44"
 	Map_data = Map.Map()
 
-	Data_saved = Save_data()
+	Data_saved = Save_data() #Setup for the storing of data class 
 	
+	#Layout creation
 	app.layout = html.Div(
-		id="app-container",
+		id="app-container",  
 		children=[
+		#Hidden DIV for OUTPUT Callback
+			html.Div(id='hidden-div', style={'display':'none'}),
 			# Left column
 			html.Div(
 
@@ -65,73 +71,76 @@ if __name__ == '__main__':
 #------INTERACTIONS-------
 	#-Switch between restaurants and airbnbs & Number of airbnbs+minimap---
 	@app.callback([
-		Output(component_id ='map', component_property='children'),
-		Output('btn-switch', 'children'),
-		Output('btn-switch', 'style'),
-		Output('data_showing', 'children'),
-		Output('mini-map', 'children'),
-		Output('Nairbnb', 'children'),
+		Output(component_id ='map', component_property='children'),#Main map component
+		Output('btn-switch', 'children'),#Text of the button (Restaurant/airbnb)
+		Output('btn-switch', 'style'),#Style of the button (White/dark)
+		Output('data_showing', 'children'),#"Currently showing ... map" text
+		Output('mini-map', 'children'),#Minimap component
+		Output('Nairbnb', 'children'), #Amount of airbnbs text
 		],[
-		Input('btn-switch', 'n_clicks'),
-		Input('map', 'bounds'),]
+		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
+		Input('map', 'bounds'),]#The bounds of the map input (Bounds)
 		)
 	def update_map(N, bounds):
-		print(N)
-		print(bounds)
+		if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
+			print("Switch")
+			Map_data_list = Map_data.switch()#Get the new html data for the new map
+			Data_saved.update_clicked()#Update the saved click counter
+		else:#When the page is loaded and button is not clicked
+			print("Do not switch")
+			Map_data_list = Map_data.update()#Get the html data for the new map (Not switched)
 
-		if N!= Data_saved.n_clicked and N!=0:
-			Map_data_list = Map_data.switch()
-			Data_saved.update_clicked()
-		else:
-			Map_data_list = Map_data.update()
-
-		Mini = Map_data.update_bounds_mini(bounds)
-		Count = Map.N_airbnbs(Map_data,bounds)
+		Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
+		Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 		N_airbnb = "Airbnbs in visible region: {}".format(Count)
 
-		if Map_data.Show =='Restaurants':
+		if Map_data.Show =='Restaurants':#If the restaurants are shown
 			output_btn = "Show AirBnBs"
 			style = {'border-color':'black',
-				'color':'black'}
-		else:
+				'color':'black'} #Change the colour of the button to be visible on the background
+			feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
+			if bool(feature):#Check whether a feature has been clciked upon
+				if not feature['properties']['cluster']:#Check whether it is not a cluster
+					geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
+					Map_data_list.append(geojsonlast)
+
+		else:#Checks whether Airbnbs are shown
 			output_btn = "Show Restaurants"
 			style = {'border-color':'white',
-				'color':'white'}
+				'color':'white'}#change colour of button to be visible on background
 
-		# feature = Data_saved.feature
-		# geojson = Map.get_house_dat(feature)
-
-		# geojson_data = dl.GeoJSON(data=geojson, options=dict(pointToLayer=draw_flag), zoomToBounds=True)
-		# Map_data_list.append(geojson_data)
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
 	#Switch advanced<->map
 	@app.callback(
-		[Output('map_div', 'style'),
-		Output('ctrl_div', 'style')],
-		[Input('btn-controls', 'n_clicks')])
+		[Output('map_div', 'style'),#Style of the map div
+		Output('ctrl_div', 'style')],#Style of the ctrl div
+		[Input('btn-controls', 'n_clicks')])#Input click on button of advanced controls
 	def switch_map_advanced(N):
-		if N!= Data_saved.n_clicked_ctrl and N!=0:
+		if N!= Data_saved.n_clicked_ctrl and N!=0:#Checks whether the button has been clicked and not the loading of the page
 			print("Clicked")
-			Data_saved.update_clicked_ctrl()
+			Data_saved.update_clicked_ctrl()#Update the click counter
 		else:
 			print("Not clicked")
 
-		if Data_saved.n_clicked_ctrl%2 ==0:
-			Output = [{'display': 'block'}, {'display': 'none'}]
-		else:
-			Output = {'display': 'none'}, {'display': 'block'}
+		if Data_saved.n_clicked_ctrl%2 ==0:#Map is shown
+			Output = [{'display': 'block'}, {'display': 'none'}]#Make map visible and hide the control dib
+		else:#Control is shown
+			Output = {'display': 'none'}, {'display': 'block'}#Hide map and make control div visible
 		return (*Output,)		
 
+
 	#---Data overing over marker---
-	@app.callback([Output("bounds", "children"), Output('tooltip', 'children')], [Input("markers", "hover_feature")])
+	@app.callback([Output("Information", "children"), #Information div 
+		Output('tooltip', 'children')], #Tooltop (hovering extension)
+		[Input("markers", "hover_feature")])#Input when a feature is hovered over
 	def update_tooltip(feature):
-		# print(feature)
-		if feature is None:
-			return Data_saved.Data,None
-		elif feature['properties']['cluster']==True:
-			return Data_saved.Data, [html.P('#N={}'.format(feature['properties']['point_count']))]
-		elif Map_data.Show=='Restaurants':
+		if feature is None: #Checks whether the page is loaded
+			return Data_saved.Data,None #return last information and no tooltip
+		elif feature['properties']['cluster']==True:#Check whether the feature is a cluster
+			return Data_saved.Data, [html.P('#N={}'.format(feature['properties']['point_count']))]#Returns cluster information
+		elif Map_data.Show=='Restaurants':#Restaurant map is shown 
+			#Creates the html for the information
 			Output = [
 			html.P("Name: {}".format(str(feature['properties']['DBA']).lower())),
 			html.P("Score: {}".format(feature['properties']['SCORE'])),
@@ -144,16 +153,28 @@ if __name__ == '__main__':
 			html.Button("Google")
 			])]
 			# print(feature)
-			Data_saved.update_hover(Output)
+			Data_saved.update_hover(Output)#update last hover feature
 			return Data_saved.Data, Data_saved.Data[0:3]
-		else:
-			Data_saved.update_hover_feature(feature)
+		else:#Airbnb map is shown
+			#Creates the html for the information
 			Output = [
 			html.P("Name: {}".format(str(feature['properties']['NAME']).lower())),
 			html.P("Price: {}".format(feature['properties']['price'])),
 			html.P("Rating: {}".format(feature['properties']['review rate number']))
 			]
-			Data_saved.update_hover(Output)
+			Data_saved.update_hover(Output)#Updates last hover feature
 			return Data_saved.Data, Data_saved.Data[0:3]
 
-	app.run_server(debug=False, dev_tools_ui=False)
+	#Update the feature clicked in data stored
+	@app.callback(Output('hidden-div', 'children'),#Output hidden div as no information has to be passed with this input
+		Input('markers', 'click_feature'))#If a feature has been clicked
+	def get_clicked_marker(feature):
+		if feature== None:#Check if page is loaded
+			pass
+		elif feature['properties']['cluster'] ==True:#Checks if 
+			pass
+		elif Map_data.Show!="Restaurants":#If the airbnbs are shown
+			Data_saved.update_click_feature(feature)#Update the feature clicked
+		return None
+
+	app.run_server(debug=False, dev_tools_ui=False)#Run the website

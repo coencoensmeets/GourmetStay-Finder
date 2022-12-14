@@ -19,7 +19,7 @@ def generate_output():
         children=[
             html.Hr(),
             #Restaurant Data
-            html.Div(id='bounds'),
+            html.Div(id='Information'),
             html.Hr(),
             html.Div(
             children=[
