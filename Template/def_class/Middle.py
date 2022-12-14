@@ -8,13 +8,13 @@ from dash_extensions.javascript import assign
 import time
 
 
-def N_airbnbs(Map_data, bounds):
+def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
 	df = Map_data.df_air
 	Count = df[(bounds[0][1]<df['long'])&(df['long']<bounds[1][1])
 		&(bounds[0][0]<df['lat'])&(df['lat']<bounds[1][0])].shape[0]
 	return Count
 
-def import_restaurants():
+def import_restaurants():#importing the restaurant data
 	data = pd.read_csv('RestaurantsNew.csv')
 	data = data[data['lon'].notna()]
 	data = data[data['lat'].notna()]
@@ -23,7 +23,7 @@ def import_restaurants():
 	return data
 
 def import_airbnb():
-	data = pd.read_csv('airbnb_open_data.csv')
+	data = pd.read_csv('airbnb_open_data.csv') #importing the airbnb Data
 	data = data[1:5000] #Line only for testing to save time
 	data = data[data['long'].notna()]
 	data = data[data['lat'].notna()]
@@ -31,16 +31,16 @@ def import_airbnb():
 	data = data.drop_duplicates(keep='last')
 	return data
 
-def df_to_geobuf(df, long):
-	T_start = time.perf_counter()
+def df_to_geobuf(df, long):#convert pandas dataframe to geobuf
+	T_start = time.perf_counter()#start timer
 	dicts = df.to_dict('rows')
 	geojson = dlx.dicts_to_geojson(dicts, lon=long)  # convert to geojson
 	geobuf = dlx.geojson_to_geobuf(geojson)  # convert to geobuf
 	print("Time elapsed: {}".format(time.perf_counter()-T_start))
 	return geobuf
 
-# #Goes together with the buggy part in app.py lines 101-108
-def get_house_data(feature):
+
+def get_house_data(feature):#Create the html data for house icon on restaurant map
 	features = [dict(name=feature['properties']['NAME'], lat=feature['geometry']['coordinates'][1], lon=feature['geometry']['coordinates'][0])]
 	# Generate geojson with a marker for each country and name as tooltip.
 	print(features)
@@ -60,18 +60,20 @@ class Map():
 		self.geobuf_res = df_to_geobuf(self.df_res, 'lon')
 		self.geobuf_air = df_to_geobuf(self.df_air, 'long')
 
-		self.url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
-		self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
+		self.url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png' #The style of the map
+		self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '#Add reference to the styling of the map 
 		self.Data = self.geobuf_res
 		self.Show = "Restaurants"
 
 		map_data = self.update()
 
+		# Initial polygon creation for the minimap
 		polygon = dl.Polygon(color="#ff7800", weight=1, positions=[[40.43963107298772,-74.21127319335939], [40.43963107298772,-73.7889862060547], [40.95967830900992,-73.7889862060547], 
 											[40.95967830900992,-74.21127319335939], [40.43963107298772,-74.21127319335939]])
 		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 
+		#Creation of the html div for the entire middle part.
 		self.html_div =  [
 			html.Div(
 				id='map_div',
@@ -107,6 +109,7 @@ class Map():
 				])])
 		]
 
+	#Switch from restaurant to airbnb map
 	def switch(self):
 		if self.Show=="Restaurants":
 			self.Data = self.geobuf_air
@@ -120,6 +123,7 @@ class Map():
 			self.attribution=False
 		return self.update()
 
+	#Get the html of the map
 	def update(self):
 		return [
 				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
@@ -128,6 +132,7 @@ class Map():
 							superClusterOptions={"radius": 400,"minPoints":20},
 							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),]
 		
+	#Update the minimap polygon returns html for the entire minimap
 	def update_bounds_mini(self,bounds):
 		polygon = dl.Polygon(color="#ff7800", weight=1, positions=[[bounds[0][0],bounds[0][1]], [bounds[0][0],bounds[1][1]], [bounds[1][0],bounds[1][1]], 
 											[bounds[1][0],bounds[0][1]], [bounds[0][0],bounds[0][1]]])
