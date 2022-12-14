@@ -7,6 +7,7 @@ import dash_leaflet.express as dlx
 from dash_extensions.javascript import assign
 import time
 import numpy as np
+import dash_daq as daq
 
 
 def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
@@ -127,6 +128,8 @@ class Map():
 				html.Div(id='ctrl_adv',children=[
 					html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
 					html.Hr(),
+					daq.Slider(id='slider1',value=0),
+					html.Div(id='slideroutput')
 				])])
 		]
 
@@ -162,3 +165,13 @@ class Map():
 		return [dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
 						self.inner_ring]
 
+
+
+# class Contol():
+# 	html.Div([
+# 		daq.Slider(
+# 			id='slider',
+# 			value=17
+# 		),
+# 		html.Div(id='slider_output')
+# 	])

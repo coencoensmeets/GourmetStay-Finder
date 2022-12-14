@@ -130,7 +130,7 @@ if __name__ == '__main__':
 		return (*Output,)		
 
 
-	#---Data overing over marker---
+	#---Data hovering over marker---
 	@app.callback([Output("Information", "children"), #Information div 
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
 		[Input("markers", "hover_feature")])#Input when a feature is hovered over
@@ -176,5 +176,10 @@ if __name__ == '__main__':
 		elif Map_data.Show!="Restaurants":#If the airbnbs are shown
 			Data_saved.update_click_feature(feature)#Update the feature clicked
 		return None
+
+
+	@app.callback(Output('slideroutput', 'children'),Input('slider1', 'value'))
+	def update_output(value):
+		return f'The slider is currently at {value}.'
 
 	app.run_server(debug=False, dev_tools_ui=False)#Run the website
