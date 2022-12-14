@@ -5,6 +5,7 @@ from dash import html
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import time
+import numpy as np
 
 
 def N_airbnbs(Map_data, bounds):
@@ -19,15 +20,35 @@ def import_restaurants():
 	data = data[data['lat'].notna()]
 	data = data.drop_duplicates(subset=['lon', 'lat'], keep='last')
 	data = data.drop_duplicates(keep='last')
+
 	return data
 
 def import_airbnb():
 	data = pd.read_csv('airbnb_open_data.csv')
-	data =data[1:5000] #Line only for testing to save time
+	data = data[1:5000] #Line only for testing to save time
 	data = data[data['long'].notna()]
 	data = data[data['lat'].notna()]
-	data = data.drop_duplicates(subset=['long', 'lat'], keep='last')
-	data = data.drop_duplicates(keep='last')
+
+	# Removing true duplicated for geographical position lat & long:
+	columns = ['lat', 'long', 'service fee', 'NAME', 'host name']
+	data = data.drop_duplicates(subset=columns)
+	data = data.replace(np.nan, 30)
+
+	#Replacing the dolar sign. Changing fee to float and removing dollar sign price
+	data['service fee'][data['service fee'].notnull()] = data['service fee'][data['service fee'].notnull()]\
+		.replace("[$,]", "", regex=True).astype(float)
+
+	data['price'][data['price'].notnull()] = data['price'][data['price'].notnull()] \
+		.replace("[$,]", "", regex=True).astype(float)
+
+	# Removing duplicated for the ID column:
+	data = data.drop_duplicates(subset='id')
+
+	# Adding a column for legality warning
+	query = (data['minimum nights'] <= 30.0) & (data['room type'] == 'Entire home/apt')
+	data['legality'] = query
+	print(data['service fee'])
+
 	return data
 
 def df_to_geobuf(df, long):
@@ -125,3 +146,4 @@ class Map():
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 		return [dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
 						self.inner_ring]
+

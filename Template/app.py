@@ -6,6 +6,7 @@ import def_class.Middle as Map
 from def_class.Output import make_output_layout
 
 from dash.dependencies import Input, Output
+import numpy as np
 import json
 
 class Save_data():
@@ -125,6 +126,7 @@ if __name__ == '__main__':
 	#---Data overing over marker---
 	@app.callback([Output("bounds", "children"), Output('tooltip', 'children')], [Input("markers", "hover_feature")])
 	def update_tooltip(feature):
+		# print(feature)
 		if feature is None:
 			return Data_saved.Data,None
 		elif feature['properties']['cluster']==True:
