@@ -67,9 +67,10 @@ def get_house_data(feature):#Create the html data for house icon on restaurant m
 	print(features)
 	geojsonhouse = dlx.dicts_to_geojson([{**feat, **dict(tooltip=feat['name'])} for feat in features])
 	draw_flag = assign("""function(feature, latlng){
-	const flag = L.icon({iconUrl: `https://i.pinimg.com/originals/b3/cc/d5/b3ccd57b054a73af1a0d281265b54ec8.jpg`, iconSize: [64, 48]});
+	const flag = L.icon({iconUrl: `https://www.shareicon.net/download/2015/12/20/690629_home_512x512.png`, iconSize: [70, 60]});
 	return L.marker(latlng, {icon: flag});
 	}""")
+	#https://i.pinimg.com/originals/b3/cc/d5/b3ccd57b054a73af1a0d281265b54ec8.jpg
 	geojson_data = dl.GeoJSON(data=geojsonhouse, options=dict(pointToLayer=draw_flag),zoomToBounds=False)
 	return geojson_data
 
