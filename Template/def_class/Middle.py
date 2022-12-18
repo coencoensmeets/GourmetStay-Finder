@@ -8,6 +8,7 @@ from dash_extensions.javascript import assign
 import time
 import numpy as np
 import dash_daq as daq
+import plotly.express as px
 
 
 def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
@@ -36,11 +37,11 @@ def import_airbnb():
 	data = data.drop_duplicates(subset=columns)
 	data = data.replace(np.nan, 30)
 
-	#Replacing the dolar sign. Changing fee to float and removing dollar sign price
+	#Replacing the dollar sign. Changing fee to float and removing dollar sign price
 	data['service fee'][data['service fee'].notnull()] = data['service fee'][data['service fee'].notnull()]\
 		.replace("[$,]", "", regex=True).astype(float)
 
-	data['price'][data['price'].notnull()] = data['price'][data['price'].notnull()] \
+	data['price'][data['price'].notnull()] = data['price'][data['price'].notnull()]\
 		.replace("[$,]", "", regex=True).astype(float)
 
 	# Removing duplicated for the ID column:
@@ -49,7 +50,7 @@ def import_airbnb():
 	# Adding a column for legality warning
 	query = (data['minimum nights'] <= 30.0) & (data['room type'] == 'Entire home/apt')
 	data['legality'] = query
-	print(data['service fee'])
+
 
 	return data
 
@@ -95,6 +96,7 @@ class Map():
 		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 
+
 		#Creation of the html div for the entire middle part.
 		self.html_div =  [
 			html.Div(
@@ -128,8 +130,12 @@ class Map():
 				html.Div(id='ctrl_adv',children=[
 					html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
 					html.Hr(),
-					daq.Slider(id='slider1',value=0),
-					html.Div(id='slideroutput')
+					dcc.Graph(id='graph'),
+					dcc.RangeSlider(min(self.df_air['price']),
+									max(self.df_air['price']),
+									value=[min(self.df_air['price']), max(self.df_air['price'])],
+									tooltip={"placement": "bottom", "always_visible": True},
+									id ='slider_price')
 				])])
 		]
 
@@ -165,13 +171,3 @@ class Map():
 		return [dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
 						self.inner_ring]
 
-
-
-# class Contol():
-# 	html.Div([
-# 		daq.Slider(
-# 			id='slider',
-# 			value=17
-# 		),
-# 		html.Div(id='slider_output')
-# 	])

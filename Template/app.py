@@ -7,7 +7,10 @@ from def_class.Output import make_output_layout
 
 from dash.dependencies import Input, Output
 import numpy as np
+import plotly.express as px
 import json
+
+
 
 #Saving data throughout the main interactions of the program. 
 class Save_data():
@@ -178,8 +181,19 @@ if __name__ == '__main__':
 		return None
 
 
-	@app.callback(Output('slideroutput', 'children'),Input('slider1', 'value'))
-	def update_output(value):
-		return f'The slider is currently at {value}.'
+	@app.callback(
+	Output('graph', 'figure'),
+	Input('slider_price', 'value'))
+
+
+	def display_color(slider_price):
+		data_air = Map.import_airbnb()
+		fig = px.histogram(data_air,
+						   x='price',
+						   range_x=[slider_price[0], slider_price[1]],
+						   nbins = 50,
+						   labels={'x':'Price', 'y':'Count of Listings'},
+						   title = 'Interactive Price Distribution')
+		return fig
 
 	app.run_server(debug=False, dev_tools_ui=False)#Run the website
