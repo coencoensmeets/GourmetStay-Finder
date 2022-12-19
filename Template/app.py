@@ -23,6 +23,9 @@ class Save_data():
 	def update_hover(self, data): #Updates the hover data
 		self.Data = data
 
+	def update_click(self,data): #Updates Clicked data
+		self.Data = data
+
 	def update_clicked(self, n=1): #Updates the click counter for switching maps
 		self.n_clicked +=n
 
@@ -102,7 +105,7 @@ if __name__ == '__main__':
 			style = {'border-color':'black',
 				'color':'black'} #Change the colour of the button to be visible on the background
 			feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
-			if bool(feature):#Check whether a feature has been clciked upon
+			if bool(feature):#Check whether a feature has been clicked upon
 				if not feature['properties']['cluster']:#Check whether it is not a cluster
 					geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
 					Map_data_list.append(geojsonlast)
@@ -132,41 +135,75 @@ if __name__ == '__main__':
 			Output = {'display': 'none'}, {'display': 'block'}#Hide map and make control div visible
 		return (*Output,)		
 
-
-	#---Data hovering over marker---
-	@app.callback([Output("Information", "children"), #Information div 
+	@app.callback([Output("Information", "children"), #Information div
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
-		[Input("markers", "hover_feature")])#Input when a feature is hovered over
-	def update_tooltip(feature):
-		if feature is None: #Checks whether the page is loaded
-			return Data_saved.Data,None #return last information and no tooltip
-		elif feature['properties']['cluster']==True:#Check whether the feature is a cluster
-			return Data_saved.Data, [html.P('#N={}'.format(feature['properties']['point_count']))]#Returns cluster information
-		elif Map_data.Show=='Restaurants':#Restaurant map is shown 
-			#Creates the html for the information
-			Output = [
-			html.P("Name: {}".format(str(feature['properties']['DBA']).lower())),
-			html.P("Score: {}".format(feature['properties']['SCORE'])),
-			html.P("Cuisine: {}".format(feature['properties']['CUISINE DESCRIPTION'])),
-			html.A(href = "https://www.google.com/search?q={} {} {} NYC".format(
-					feature['properties']['DBA'],
-					feature['properties']['BUILDING'],
-					feature['properties']['STREET']).lower()
-				,children=[
-			html.Button("Google")
-			])]
-			# print(feature)
-			Data_saved.update_hover(Output)#update last hover feature
-			return Data_saved.Data, Data_saved.Data[0:3]
-		else:#Airbnb map is shown
-			#Creates the html for the information
-			Output = [
-			html.P("Name: {}".format(str(feature['properties']['NAME']).lower())),
-			html.P("Price: {}".format(feature['properties']['price'])),
-			html.P("Rating: {}".format(feature['properties']['review rate number']))
-			]
-			Data_saved.update_hover(Output)#Updates last hover feature
-			return Data_saved.Data, Data_saved.Data[0:3]
+		[Input("markers", "hover_feature"), #Input when a feature is hovered over
+		 Input("markers", "click_feature")]) #Input when a feature is clicked on
+	def update_tooltip(hover_feature,click_feature):
+		if hover_feature is None and click_feature is None:
+			return Data_saved.Data, None  # return last information and no tooltip
+		if click_feature is None or (click_feature != hover_feature and hover_feature is not None):
+			if hover_feature['properties']['cluster'] == True:  # Check whether the feature is a cluster
+				return Data_saved.Data, [
+					html.P('#N={}'.format(hover_feature['properties']['point_count']))]  # Returns cluster information
+			elif Map_data.Show == 'Restaurants':  # Restaurant map is shown
+				# Creates the html for the information
+				Output = [
+					html.B("NOT SELECTED"),
+					html.P("Name: {}".format(str(hover_feature['properties']['DBA']).lower())),
+					html.P("Score: {}".format(hover_feature['properties']['SCORE'])),
+					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE DESCRIPTION'])),
+					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
+						hover_feature['properties']['DBA'],
+						hover_feature['properties']['BUILDING'],
+						hover_feature['properties']['STREET']).lower()
+						   , children=[
+							html.Button("Google")
+						])]
+				# print(feature)
+				Data_saved.update_hover(Output)  # update last hover feature
+				return Data_saved.Data, Data_saved.Data[0:4]
+			else:  # Airbnb map is shown
+				# Creates the html for the information
+				Output = [
+					html.B("NOT SELECTED"),
+					html.P("Name: {}".format(str(hover_feature['properties']['NAME']).lower())),
+					html.P("Price: {}".format(hover_feature['properties']['price'])),
+					html.P("Rating: {}".format(hover_feature['properties']['review rate number']))
+				]
+				Data_saved.update_hover(Output)  # Updates last hover feature
+				return Data_saved.Data, Data_saved.Data[0:4]
+		else:
+			if click_feature['properties']['cluster'] == True:  # Check whether the feature is a cluster
+				return Data_saved.Data, [
+					html.P('#N={}'.format(click_feature['properties']['point_count']))]  # Returns cluster information
+			elif Map_data.Show == 'Restaurants':  # Restaurant map is shown
+				# Creates the html for the information
+				Output = [
+					html.B("SELECTED"),
+					html.P("Name: {}".format(str(click_feature['properties']['DBA']).lower())),
+					html.P("Score: {}".format(click_feature['properties']['SCORE'])),
+					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE DESCRIPTION'])),
+					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
+						click_feature['properties']['DBA'],
+						click_feature['properties']['BUILDING'],
+						click_feature['properties']['STREET']).lower()
+						   , children=[
+							html.Button("Google")
+						])]
+				# print(feature)
+				Data_saved.update_click(Output)  # update last hover feature
+				return Data_saved.Data, Data_saved.Data[0:4]
+			else:  # Airbnb map is shown
+				# Creates the html for the information
+				Output = [
+					html.B("SELECTED"),
+					html.P("Name: {}".format(str(click_feature['properties']['NAME']).lower())),
+					html.P("Price: {}".format(click_feature['properties']['price'])),
+					html.P("Rating: {}".format(click_feature['properties']['review rate number']))
+				]
+				Data_saved.update_click(Output)  # Updates last hover feature
+				return Data_saved.Data, Data_saved.Data[0:4]
 
 	#Update the feature clicked in data stored
 	@app.callback(Output('hidden-div', 'children'),#Output hidden div as no information has to be passed with this input
