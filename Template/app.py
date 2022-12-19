@@ -1,11 +1,10 @@
 import dash
-from dash import dcc
-from dash import html
+from dash import dcc, html, ctx
 from def_class.menu import make_menu_layout
 import def_class.Middle as Map
 from def_class.Output import make_output_layout
 
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import numpy as np
 import plotly.express as px
 import json
@@ -85,35 +84,40 @@ if __name__ == '__main__':
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
 		],[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
-		Input('map', 'bounds'),]#The bounds of the map input (Bounds)
+		Input('map', 'bounds'),],#The bounds of the map input (Bounds)
+		[State(component_id ='map', component_property='children'),
+		State('btn-switch', 'children'),
+		State('btn-switch', 'style'),
+		State('mini-map', 'children'),
+		State('Nairbnb', 'children')]
 		)
-	def update_map(N, bounds):
-		if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
-			print("Switch")
-			Map_data_list = Map_data.switch()#Get the new html data for the new map
-			Data_saved.update_clicked()#Update the saved click counter
-		else:#When the page is loaded and button is not clicked
-			print("Do not switch")
-			Map_data_list = Map_data.update()#Get the html data for the new map (Not switched)
+	def update_map(N, bounds, Map_data_list, output_btn, style, Mini, N_airbnb):
+		id_input = ctx.triggered_id
 
-		Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
-		Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-		N_airbnb = "Airbnbs in visible region: {}".format(Count)
+		if (id_input=='btn-switch'):
+			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
+				print("Switch")
+				Map_data_list = Map_data.switch()#Get the new html data for the new map
+				Data_saved.update_clicked()#Update the saved click counter
 
-		if Map_data.Show =='Restaurants':#If the restaurants are shown
-			output_btn = "Show AirBnBs"
-			style = {'border-color':'black',
-				'color':'black'} #Change the colour of the button to be visible on the background
-			feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
-			if bool(feature):#Check whether a feature has been clicked upon
-				if not feature['properties']['cluster']:#Check whether it is not a cluster
-					geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
-					Map_data_list.append(geojsonlast)
+				if Map_data.Show =='Restaurants':#If the restaurants are shown
+					output_btn = "Show AirBnBs"
+					style = {'border-color':'black',
+						'color':'black'} #Change the colour of the button to be visible on the background
+					feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
+					if bool(feature):#Check whether a feature has been clicked upon
+						if not feature['properties']['cluster']:#Check whether it is not a cluster
+							geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
+							Map_data_list.append(geojsonlast)
 
-		else:#Checks whether Airbnbs are shown
-			output_btn = "Show Restaurants"
-			style = {'border-color':'white',
-				'color':'white'}#change colour of button to be visible on background
+				else:#Checks whether Airbnbs are shown
+					output_btn = "Show Restaurants"
+					style = {'border-color':'white',
+						'color':'white'}#change colour of button to be visible on background
+		if (id_input=='map'):
+			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
 
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
@@ -152,7 +156,7 @@ if __name__ == '__main__':
 					html.B("NOT SELECTED"),
 					html.P("Name: {}".format(str(hover_feature['properties']['DBA']).lower())),
 					html.P("Score: {}".format(hover_feature['properties']['SCORE'])),
-					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE DESCRIPTION'])),
+					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE_DESCRIPTION'])),
 					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
 						hover_feature['properties']['DBA'],
 						hover_feature['properties']['BUILDING'],
@@ -169,7 +173,7 @@ if __name__ == '__main__':
 					html.B("NOT SELECTED"),
 					html.P("Name: {}".format(str(hover_feature['properties']['NAME']).lower())),
 					html.P("Price: {}".format(hover_feature['properties']['price'])),
-					html.P("Rating: {}".format(hover_feature['properties']['review rate number']))
+					html.P("Rating: {}".format(hover_feature['properties']['review_rate_number']))
 				]
 				Data_saved.update_hover(Output)  # Updates last hover feature
 				return Data_saved.Data, Data_saved.Data[0:4]
@@ -183,7 +187,7 @@ if __name__ == '__main__':
 					html.B("SELECTED"),
 					html.P("Name: {}".format(str(click_feature['properties']['DBA']).lower())),
 					html.P("Score: {}".format(click_feature['properties']['SCORE'])),
-					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE DESCRIPTION'])),
+					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE_DESCRIPTION'])),
 					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
 						click_feature['properties']['DBA'],
 						click_feature['properties']['BUILDING'],
@@ -200,7 +204,7 @@ if __name__ == '__main__':
 					html.B("SELECTED"),
 					html.P("Name: {}".format(str(click_feature['properties']['NAME']).lower())),
 					html.P("Price: {}".format(click_feature['properties']['price'])),
-					html.P("Rating: {}".format(click_feature['properties']['review rate number']))
+					html.P("Rating: {}".format(click_feature['properties']['review_rate_number']))
 				]
 				Data_saved.update_click(Output)  # Updates last hover feature
 				return Data_saved.Data, Data_saved.Data[0:4]
@@ -221,10 +225,8 @@ if __name__ == '__main__':
 	@app.callback(
 	Output('graph', 'figure'),
 	Input('slider_price', 'value'))
-
-
 	def display_color(slider_price):
-		data_air = Map.import_airbnb()
+		data_air = Map_data.df_air
 		fig = px.histogram(data_air,
 						   x='price',
 						   range_x=[slider_price[0], slider_price[1]],

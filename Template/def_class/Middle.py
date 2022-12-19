@@ -1,7 +1,6 @@
 import pandas as pd
 
-from dash import dcc
-from dash import html
+from dash import dcc, html, ctx
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 from dash_extensions.javascript import assign
@@ -9,6 +8,8 @@ import time
 import numpy as np
 import dash_daq as daq
 import plotly.express as px
+
+import copy
 
 
 def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
@@ -21,14 +22,15 @@ def import_restaurants():#importing the restaurant data
 	data = pd.read_csv('RestaurantsNew.csv')
 	data = data[data['lon'].notna()]
 	data = data[data['lat'].notna()]
+	data.dropna()
 	data = data.drop_duplicates(subset=['lon', 'lat'], keep='last')
 	data = data.drop_duplicates(keep='last')
-
+	data.columns = data.columns.str.replace(' ', '_')
 	return data
 
 def import_airbnb():
 	data = pd.read_csv('airbnb_open_data.csv') #importing the airbnb Data
-	data = data[1:5000] #Line only for testing to save time
+	# data = data[1:5000] #Line only for testing to save time
 	data = data[data['long'].notna()]
 	data = data[data['lat'].notna()]
 
@@ -36,6 +38,7 @@ def import_airbnb():
 	columns = ['lat', 'long', 'service fee', 'NAME', 'host name']
 	data = data.drop_duplicates(subset=columns)
 	data = data.replace(np.nan, 30)
+	data.dropna()
 
 	#Replacing the dollar sign. Changing fee to float and removing dollar sign price
 	data['service fee'][data['service fee'].notnull()] = data['service fee'][data['service fee'].notnull()]\
@@ -51,16 +54,15 @@ def import_airbnb():
 	query = (data['minimum nights'] <= 30.0) & (data['room type'] == 'Entire home/apt')
 	data['legality'] = query
 
-
+	data.columns = data.columns.str.replace(' ', '_')
 	return data
 
-def df_to_geobuf(df, long):#convert pandas dataframe to geobuf
+def df_to_geojson(df, long):#convert pandas dataframe to geojson
 	T_start = time.perf_counter()#start timer
 	dicts = df.to_dict('rows')
 	geojson = dlx.dicts_to_geojson(dicts, lon=long)  # convert to geojson
-	geobuf = dlx.geojson_to_geobuf(geojson)  # convert to geobuf
 	print("Time elapsed: {}".format(time.perf_counter()-T_start))
-	return geobuf
+	return geojson
 
 
 def get_house_data(feature):#Create the html data for house icon on restaurant map
@@ -81,13 +83,14 @@ class Map():
 	def __init__(self):
 		self.df_res = import_restaurants()
 		self.df_air = import_airbnb()
-		self.geobuf_res = df_to_geobuf(self.df_res, 'lon')
-		self.geobuf_air = df_to_geobuf(self.df_air, 'long')
+		self.geojson_res = df_to_geojson(self.df_res, 'lon')
+		self.geojson_air = df_to_geojson(self.df_air, 'long')
 
 		self.url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png' #The style of the map
 		self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '#Add reference to the styling of the map 
-		self.Data = self.geobuf_res
+		self.Data = copy.deepcopy(self.geojson_res)
 		self.Show = "Restaurants"
+		self.filter = assign("function(feature, context){{return true;}}")
 
 		map_data = self.update()
 
@@ -114,13 +117,13 @@ class Map():
 					dl.Map(children=[
 						dl.TileLayer(url=self.url, maxZoom=20, minZoom=10,attribution=self.attribution),
 						# dl.GestureHandling(),#Adds ctrl to zoom
-						dl.GeoJSON(data=self.Data, format="geobuf",cluster=True, id="markers", zoomToBoundsOnClick=True,
+						dl.GeoJSON(data=self.Data,cluster=True, id="markers", zoomToBoundsOnClick=True,
 									superClusterOptions={"radius": 400,"minPoints":20},
 							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),
 					], center=(40.7, -74), zoom=11, style={'width': '100%', 'height': '100%', 'display': 'inline-block', 'position': 'absolute', 'z-index': '1'}, id='map'),
 					# html.H6('Switch', id='btn-switch'),
 					html.Div(className='btn-wrapper',children=[
-						html.Button('Button 1', id='btn-switch', n_clicks=0),
+						html.Button('Show Airbnbs', id='btn-switch', n_clicks=0),
 					])
 				],
 			),
@@ -143,14 +146,18 @@ class Map():
 	#Switch from restaurant to airbnb map
 	def switch(self):
 		if self.Show=="Restaurants":
-			self.Data = self.geobuf_air
+			T_start = time.perf_counter()
+			# print(self.geojson_air['features'])
+			self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if data['properties']['price']>1000])
+			# self.Data = self.geojson_air
+			print("Time to filter: {}".format(time.perf_counter()-T_start))
 			self.Show = "Airbnbs"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 			self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
 		else:
-			self.Data = self.geobuf_res
+			self.Data = copy.deepcopy(self.geojson_res)
 			self.Show = "Restaurants"
-			self.url=self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
+			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 			self.attribution=False
 		return self.update()
 
@@ -159,7 +166,7 @@ class Map():
 		return [
 				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
 				# dl.GestureHandling(),#Adds ctrl to zoom
-				dl.GeoJSON(data=self.Data, format="geobuf",cluster=True, id="markers", zoomToBoundsOnClick=True,
+				dl.GeoJSON(data=self.Data,cluster=True, id="markers", zoomToBoundsOnClick=True,
 							superClusterOptions={"radius": 400,"minPoints":20},
 							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),]
 		
