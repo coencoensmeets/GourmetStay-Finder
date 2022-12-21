@@ -148,15 +148,15 @@ class Map():
 			T_start = time.perf_counter()
 			# print(self.geojson_air['features'])
 			#self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if data['properties']['price']>1000])
-			self.Data = copy.deepcopy(self.geojson_air)
+			self.Data = copy.copy(self.geojson_air)
 			#self.Data = self.geojson_air
 			print("Time to filter: {}".format(time.perf_counter()-T_start))
 			self.Show = "Airbnbs"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 			self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
 		else:
-			self.Data = copy.deepcopy(self.geojson_res)
-			#self.data = self.geojson_res
+			#self.Data = copy.copy(self.geojson_res)
+			self.data = self.geojson_res
 			self.Show = "Restaurants"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 			self.attribution=False
