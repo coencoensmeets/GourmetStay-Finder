@@ -84,16 +84,17 @@ if __name__ == '__main__':
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
 		],[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
-		Input('map', 'bounds'),],#The bounds of the map input (Bounds)
+		Input('map', 'bounds'),#The bounds of the map input (Bounds)
+		Input('slider_price','value')],#Price slider values
 		[State(component_id ='map', component_property='children'),
 		State('btn-switch', 'children'),
 		State('btn-switch', 'style'),
 		State('mini-map', 'children'),
 		State('Nairbnb', 'children')]
 		)
-	def update_map(N, bounds, Map_data_list, output_btn, style, Mini, N_airbnb):
+	def update_map(N, bounds, slider_price, Map_data_list, output_btn, style, Mini, N_airbnb):
+		print(slider_price)
 		id_input = ctx.triggered_id
-
 		if (id_input=='btn-switch'):
 			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
 				print("Switch")
@@ -118,7 +119,10 @@ if __name__ == '__main__':
 			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 			N_airbnb = "Airbnbs in visible region: {}".format(Count)
-
+		if (id_input == 'slider_price'): #Filter the map, when the slider is tweaked
+			Map_data_list = Map_data.update_filter(slider_price)
+			print("filtered")
+		print(id_input)
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
 	#Switch advanced<->map

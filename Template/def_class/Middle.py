@@ -91,7 +91,6 @@ class Map():
 		self.Data = copy.deepcopy(self.geojson_res)
 		self.Show = "Restaurants"
 		self.filter = assign("function(feature, context){{return true;}}")
-
 		map_data = self.update()
 
 		# Initial polygon creation for the minimap
@@ -148,14 +147,16 @@ class Map():
 		if self.Show=="Restaurants":
 			T_start = time.perf_counter()
 			# print(self.geojson_air['features'])
-			self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if data['properties']['price']>1000])
-			# self.Data = self.geojson_air
+			#self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if data['properties']['price']>1000])
+			self.Data = copy.deepcopy(self.geojson_air)
+			#self.Data = self.geojson_air
 			print("Time to filter: {}".format(time.perf_counter()-T_start))
 			self.Show = "Airbnbs"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 			self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
 		else:
 			self.Data = copy.deepcopy(self.geojson_res)
+			#self.data = self.geojson_res
 			self.Show = "Restaurants"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 			self.attribution=False
@@ -163,6 +164,17 @@ class Map():
 
 	#Get the html of the map
 	def update(self):
+		return [
+				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
+				# dl.GestureHandling(),#Adds ctrl to zoom
+				dl.GeoJSON(data=self.Data,cluster=True, id="markers", zoomToBoundsOnClick=True,
+							superClusterOptions={"radius": 400,"minPoints":20},
+							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),]
+
+	def update_filter(self,price_range): #Price filter for AirBnBs
+		if self.Show =="Airbnbs":
+			self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if (data['properties']['price'] >= price_range[0] and data['properties']['price'] <= price_range[1])])
+			#print("Time to filter: {}".format(time.perf_counter() - T_start))
 		return [
 				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
 				# dl.GestureHandling(),#Adds ctrl to zoom
