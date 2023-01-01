@@ -103,8 +103,7 @@ if __name__ == '__main__':
 
 				if Map_data.Show =='Restaurants':#If the restaurants are shown
 					output_btn = "Show AirBnBs"
-					style = {'border-color':'black',
-						'color':'black'} #Change the colour of the button to be visible on the background
+					style = {'border-color':'black','color':'black'}#Change the colour of the button to be visible on the background
 					feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
 					if bool(feature):#Check whether a feature has been clicked upon
 						if not feature['properties']['cluster']:#Check whether it is not a cluster
@@ -125,12 +124,18 @@ if __name__ == '__main__':
 		print(id_input)
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
-	#Switch advanced<->map
+	#Switch advanced<->map and hide control bulk
 	@app.callback(
-		[Output('map_div', 'style'),#Style of the map div
-		Output('ctrl_div', 'style')],#Style of the ctrl div
-		[Input('btn-controls', 'n_clicks')])#Input click on button of advanced controls
-	def switch_map_advanced(N):
+		[Output('map_div', 'style'),  #Style of the map div
+		 Output('ctrl_div_res', 'style'),
+		 Output('ctrl_div_air', 'style'),
+		 Output('ctrl_price', 'style'),  # Style of the price slider
+		 Output('ctrl_fee', 'style')
+		 ],#Style of the ctrl div
+		[Input('btn-controls', 'n_clicks'),
+		 Input('dropdown', 'value')])#Input click on button of advanced controls
+
+	def switch_map_advanced(N, dropdown):
 		if N!= Data_saved.n_clicked_ctrl and N!=0:#Checks whether the button has been clicked and not the loading of the page
 			print("Clicked")
 			Data_saved.update_clicked_ctrl()#Update the click counter
@@ -138,10 +143,40 @@ if __name__ == '__main__':
 			print("Not clicked")
 
 		if Data_saved.n_clicked_ctrl%2 ==0:#Map is shown
-			Output = [{'display': 'block'}, {'display': 'none'}]#Make map visible and hide the control dib
-		else:#Control is shown
-			Output = {'display': 'none'}, {'display': 'block'}#Hide map and make control div visible
-		return (*Output,)		
+			Output = [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}, #Make map visible and hide the control dib
+					  {'display': 'none'}, {'display': 'none'}] # Sliders
+
+		elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show == 'Restaurants'):
+			Output = {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, \
+					 {'display': 'none'}, {'display': 'none'}
+
+
+
+		elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show != 'Restaurants'):
+			if dropdown == 'price':
+				Output = {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, \
+						 {'display': 'block'}, {'display': 'none'}
+			elif dropdown == 'service_fee':
+				Output = {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, \
+						 {'display': 'none'}, {'display': 'block'}
+
+
+		return (*Output,)
+
+	# Callback to hide/show sliders when a certain attribute is shown in the histogram
+	# @app.callback(
+	# 	[Output('ctrl_price', 'style'), #Style of the price slider
+	# 	 Output('ctrl_fee', 'style')],   #Style of service fee slider.
+	# 	[Input('dropdown', 'value')])#Input click on button of advanced controls
+	#
+	# def sliders_show(dropdown):
+	# 	if (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show == 'Restaurants') and (dropdown == 'price'):
+	# 		Output = [{'display': 'block'}, {'display': 'none'}]
+	#
+	# 	elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show != 'Restaurants') and (dropdown == 'service_fee'):
+	# 		Output = [{'display': 'none'}, {'display': 'block'}]
+	#
+	# 	return (*Output,)
 
 	@app.callback([Output("Information", "children"), #Information div
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
@@ -226,17 +261,114 @@ if __name__ == '__main__':
 		return None
 
 
-	@app.callback(
-	Output('graph', 'figure'),
-	Input('slider_price', 'value'))
-	def display_color(slider_price):
+	@app.callback(Output('graph', 'figure'),
+				  Input('slider_price', 'value'),
+				  Input('slider_fee', 'value'),
+				  Input('dropdown', 'value'))
+	def controls_air(slider_price, slider_fee, dropdown):
 		data_air = Map_data.df_air
+
+		if dropdown == 'price':
+			nBins = Map_data.Bins_price
+
+		else:
+			nBins = Map_data.Bins_fee
+
 		fig = px.histogram(data_air,
-						   x='price',
-						   range_x=[slider_price[0], slider_price[1]],
-						   nbins = 50,
-						   labels={'x':'Price', 'y':'Count of Listings'},
-						   title = 'Interactive Price Distribution')
+						   x= dropdown,  # 'price',
+						   range_x=[min(data_air[dropdown]), max(data_air[dropdown])],
+						   nbins=nBins,
+						   )
+
+		# Code to make selected boundaries visible on the histogram
+		if dropdown == 'price':
+			fig.add_vline(x=slider_price[0], line_dash='dash', line_color='black') #x=slider_price[0]
+			fig.add_vline(x=slider_price[1], line_dash='dash', line_color='black')
+			fig.add_vrect(x0=slider_price[0], x1=slider_price[1],
+				  annotation_text="Selected Area", annotation_position="top",
+				  fillcolor="red", opacity=0.25, line_width=0)
+			fig.update_layout(title={"text": "Price Distribution", "x": 0.5}, yaxis_title="Number of Listings")
+
+			return fig
+
+		else:
+			fig.add_vline(x=slider_fee[0], line_dash='dash', line_color='black')
+			fig.add_vline(x=slider_fee[1], line_dash='dash', line_color='black')
+			fig.add_vrect(x0=slider_fee[0], x1=slider_fee[1],
+					  annotation_text="Selected Area", annotation_position="top",
+					  fillcolor="red", opacity=0.25, line_width=0)
+			fig.update_layout(title={"text": "Service Fee Distribution", "x": 0.5}, yaxis_title="Number of Listings")
+			return fig
+
+
+	# @app.callback(Output('bar_grade', 'figure'),
+	# 			  Input('checklist', 'value'))
+	#
+	# def controls_res(checklist):
+	#
+	# 	data_res = Map_data.df_res
+	# 	res_col = data_res['GRADE'].value_counts().rename_axis('Grade').to_frame(
+	# 		'counts')  # Creating extra dataframe for grades frequencies.
+	# 	res_col['GRADE'] = ['A', 'U', 'B', 'C']
+	#
+	# 	if checklist == ['A', 'B', 'C', 'U']:
+	# 		fig = px.histogram(res_col,
+	# 						   x='GRADE',
+	# 						   y = 'counts')
+	# 	else:
+	# 		data_res['rem'] = data_res['GRADE'].unique() == checklist
+	# 		# show = data_res.loc[data_res['GRADE'] != checklist]
+	# 		fig = px.histogram(data_res,
+	# 						   x='rem',
+	# 						   y='counts')
+	#
+	# 	# else
+	# 	# 	for x in range(0, len(checklist)):
+	# 	# 		remainder = ['A', 'B', 'C', 'U']
+	# 	# 		remainder = ['A', 'B', 'C', 'U'].remove(checklist[x])
+	# 	# 		for i in range(0, len(remainder)):
+	# 	# 			show = data_res.drop(data_res[data_res['GRADE'] == remainder[i]].index)
+	# 	# 			fig = px.histogram(show,
+	# 	# 					   		x='GRADE')
+	#
+	# 	# if checklist == ['A', 'B', 'C', 'U']:
+	# 	# 	fig = px.histogram(data_res,
+	# 	# 					   x='GRADE')
+	# 	#
+	# 	# elif checklist == ['A', 'B', 'C']:
+	# 	# 	show = data_res.drop(data_res[data_res['GRADE'] == 'U'].index)
+	# 	# 	fig = px.histogram(show,
+	# 	# 					   x='GRADE')
+	# 	#
+	# 	# elif checklist == ['A', 'B']:
+	# 	# 	show = data_res.drop(data_res[data_res['GRADE'] == ['U', 'C']].index)
+	# 	# 	fig = px.histogram(show,
+	# 	# 					   x='GRADE')
+	#
+	#
+	#
+	# 	return fig
+
+
+	@app.callback(Output('score_graph', 'figure'),
+				  Input('slider_score', 'value'))
+
+	def score_control(slider_score):
+		data_res = Map_data.df_res
+
+		fig = px.histogram(data_res,
+						   x = 'SCORE',
+						   range_x=[min(data_res['SCORE']), max(data_res['SCORE'])],
+						   nbins=Map_data.Bins_score,
+						   )
+
+		fig.add_vline(x=slider_score[0], line_dash='dash', line_color='black')
+		fig.add_vline(x=slider_score[1], line_dash='dash', line_color='black')
+		fig.add_vrect(x0=slider_score[0], x1=slider_score[1],
+				  	annotation_text="Selected Area", annotation_position="top",
+				  	fillcolor="red", opacity=0.25, line_width=0)
+		fig.update_layout(title={"text": "Score Distribution", "x": 0.5}, yaxis_title="Number of Restaurants")
+
 		return fig
 
 	app.run_server(debug=False, dev_tools_ui=False)#Run the website

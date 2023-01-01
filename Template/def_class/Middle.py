@@ -26,6 +26,23 @@ def import_restaurants():#importing the restaurant data
 	data = data.drop_duplicates(subset=['lon', 'lat'], keep='last')
 	data = data.drop_duplicates(keep='last')
 	data.columns = data.columns.str.replace(' ', '_')
+	data['SCORE'] = data['SCORE'].fillna(0)
+	data['SCORE'].astype(int)
+	#Restaurants with pending grades are all put under the U for unknown
+	data['GRADE'] = data['GRADE'].fillna('U')
+	data['GRADE'] = data['GRADE'].replace({'Not Yet Graded': 'U'})
+	data['GRADE'] = data['GRADE'].replace({'P': 'U'})
+	data['GRADE'] = data['GRADE'].replace({'Z': 'U'})
+	data['SCORE'] = data['SCORE'].replace({-1: 0})
+
+	# Index(['CAMIS', 'DBA', 'BORO', 'BUILDING', 'STREET', 'ZIPCODE', 'PHONE',
+	#        'CUISINE_DESCRIPTION', 'INSPECTION_DATE', 'ACTION', 'VIOLATION_CODE',
+	#        'VIOLATION_DESCRIPTION', 'CRITICAL_FLAG', 'SCORE', 'GRADE',
+	#        'GRADE_DATE', 'RECORD_DATE', 'INSPECTION_TYPE', 'lat', 'lon']
+
+	# print('letter are: ', data['GRADE'].unique()) #, data['SCORE'].head())
+	# print('The minimum is: ', min(data['SCORE']), 'the maximum is: ', max(data['SCORE']))
+	# print(min(data['GRADE']), max(data['GRADE']), min(data['SCORE']), max(data['SCORE']))
 	return data
 
 def import_airbnb():
@@ -53,6 +70,7 @@ def import_airbnb():
 	# Adding a column for legality warning
 	query = (data['minimum nights'] <= 30.0) & (data['room type'] == 'Entire home/apt')
 	data['legality'] = query
+	data['trustworthiness'] = query
 
 	data.columns = data.columns.str.replace(' ', '_')
 	return data
@@ -83,8 +101,13 @@ class Map():
 	def __init__(self):
 		self.df_res = import_restaurants()
 		self.df_air = import_airbnb()
+		self.res_col = self.df_res['GRADE'].value_counts().rename_axis('Grade').to_frame('counts') #Creating extra dataframe for grades frequencies.
+		self.res_col['GRADE'] = ['A', 'B', 'C', 'U']
 		self.geojson_res = df_to_geojson(self.df_res, 'lon')
 		self.geojson_air = df_to_geojson(self.df_air, 'long')
+		self.Bins_price = 50
+		self.Bins_fee = 40
+		self.Bins_score = 25
 
 		self.url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png' #The style of the map
 		self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '#Add reference to the styling of the map 
@@ -92,13 +115,13 @@ class Map():
 		self.Show = "Restaurants"
 		self.filter = assign("function(feature, context){{return true;}}")
 		map_data = self.update()
+		self.int_col = ['price', 'service_fee']
 
 		# Initial polygon creation for the minimap
 		polygon = dl.Polygon(color="#ff7800", weight=1, positions=[[40.43963107298772,-74.21127319335939], [40.43963107298772,-73.7889862060547], [40.95967830900992,-73.7889862060547], 
 											[40.95967830900992,-74.21127319335939], [40.43963107298772,-74.21127319335939]])
 		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
-
 
 		#Creation of the html div for the entire middle part.
 		self.html_div =  [
@@ -126,20 +149,80 @@ class Map():
 					])
 				],
 			),
-			#Create div for the control
-			html.Div(id='ctrl_div',
-				style={'display': 'none'},
-				children=[
-				html.Div(id='ctrl_adv',children=[
-					html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
-					html.Hr(),
-					dcc.Graph(id='graph'),
-					dcc.RangeSlider(min(self.df_air['price']),
-									max(self.df_air['price']),
-									value=[min(self.df_air['price']), max(self.df_air['price'])],
-									tooltip={"placement": "bottom", "always_visible": True},
-									id ='slider_price')
-				])])
+
+			#AirBnB Controls Objects
+			html.Div(id='ctrl_div_air', style={'display': 'none'}, children=[
+							html.Div(id='legality', style={'display': 'block'}, children=[
+							html.Center(children=[
+							html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
+							html.Hr(),
+							html.P("Legality Warning:"),
+							dcc.RadioItems(['Warning On', 'Warning Off'],
+								   'Warning Off',
+								   inline=True,
+								   id='legality_radio')
+							])
+							]),
+						 	 html.Div(id='ctrl_adv', children=[
+							 # html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
+							 # html.Hr(),
+							 dcc.Dropdown(self.int_col,
+                						  'price',
+               							id='dropdown',
+            							 ),
+							 dcc.Graph(id='graph'),
+							 ]),
+							 html.Div(id='ctrl_price', style={'display': 'block'},  children=[
+							 html.P("Price Slider:"),
+							 dcc.RangeSlider(min = min(self.df_air['price']),
+											 max = max(self.df_air['price']),
+											 step = self.Bins_price,
+											 value=[min(self.df_air['price']), max(self.df_air['price'])],
+											 tooltip={"placement": "top", "always_visible": True},
+											 allowCross=False,
+											 id='slider_price'
+											 )]),
+				            html.Div(id='ctrl_fee', style={'display': 'block'}, children=[
+							html.P("Service Fee Slider:"),
+							dcc.RangeSlider(min = min(self.df_air['service_fee']),
+											max = max(self.df_air['service_fee']),
+											step = self.Bins_fee,
+											value=[min(self.df_air['service_fee']), max(self.df_air['service_fee'])],
+											tooltip={"placement": "top", "always_visible": True},
+											allowCross=False,
+											id='slider_fee'
+											)]),
+
+							]),
+
+			# Restaurants Control Objects
+			html.Div(id='ctrl_div_res', style={'display': 'none'}, children=[
+				html.P("Grade Control:"),
+				dcc.Graph(id='bar_grade'),
+				dcc.Checklist(
+					id="checklist",
+					options=[
+						{'label': 'A', 'value': 'A'},
+						{'label': 'B', 'value': 'B'},
+						{'label': 'C', 'value': 'C'},
+						{'label': 'U', 'value': 'U'},
+					],
+					value=['A', 'B', 'C', 'U'],
+					labelStyle={"display": "inline-block"},
+				),
+				html.P("Score Control:"),
+				dcc.Graph(id='score_graph', figure = px.histogram(self.df_res, x="SCORE", nbins=self.Bins_score)),
+				dcc.RangeSlider(min=min(self.df_res['SCORE']),
+								max=max(self.df_res['SCORE']),
+								step = 9,
+								value=[min(self.df_res['SCORE']), max(self.df_res['SCORE'])],
+								tooltip={"placement": "top", "always_visible": True},
+								allowCross=False,
+								id='slider_score'
+								),
+			])
+
+
 		]
 
 	#Switch from restaurant to airbnb map
