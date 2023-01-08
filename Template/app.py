@@ -1,6 +1,6 @@
 import dash
 from dash import dcc, html, ctx
-from def_class.menu import make_menu_layout
+from def_class.menu import make_menu_layout, range_slider
 import def_class.Middle as Map
 from def_class.Output import make_output_layout
 
@@ -9,6 +9,13 @@ import numpy as np
 import plotly.express as px
 import json
 
+
+# Remove pandas warnings and surpresses DASH GET and POST outputs
+import warnings
+warnings.filterwarnings("ignore")
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 #Saving data throughout the main interactions of the program. 
@@ -36,6 +43,7 @@ class Save_data():
 		self.feature = feature
 
 if __name__ == '__main__':
+	print("Loading entire back-end system\n---This can take a few seconds")
 	#---Main Setup---
 	app = dash.Dash(__name__)
 	app.title = "Group 44"
@@ -54,16 +62,14 @@ if __name__ == '__main__':
 
 				id="left-column",
 				className="two columns",
-				children=make_menu_layout()
+				children=make_menu_layout(Map_data)
 			),
-
 			# Middle column
 			html.Div(
 				id="middle-column",
 				className="eight columns",
 				children=Map_data.html_div
 			),
-
 			html.Div(
 
 				id="right-column",
@@ -82,18 +88,23 @@ if __name__ == '__main__':
 		Output('data_showing', 'children'),#"Currently showing ... map" text
 		Output('mini-map', 'children'),#Minimap component
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
-		],[
+		Output('loading-output', 'value'),
+		],
+		[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
 		Input('map', 'bounds'),#The bounds of the map input (Bounds)
-		Input('slider_price','value')],#Price slider values
-		[State(component_id ='map', component_property='children'),
+		Input('res_filter_graph', 'relayoutData'),
+		Input('air_filter_graph', 'relayoutData')],
+		[
+		State(component_id ='map', component_property='children'),
 		State('btn-switch', 'children'),
 		State('btn-switch', 'style'),
 		State('mini-map', 'children'),
-		State('Nairbnb', 'children')]
+		State('Nairbnb', 'children'),
+		State('res_filter_drop', 'value'),
+		State('air_filter_drop', 'value')]
 		)
-	def update_map(N, bounds, slider_price, Map_data_list, output_btn, style, Mini, N_airbnb):
-		print(slider_price)
+	def update_map(N, bounds,layout_graph_res,layout_graph_air, Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air):
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
 			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
@@ -118,13 +129,29 @@ if __name__ == '__main__':
 			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 			N_airbnb = "Airbnbs in visible region: {}".format(Count)
-		if (id_input == 'slider_price'): #Filter the map, when the slider is tweaked
-			Map_data_list = Map_data.update_filter(slider_price)
-			print("filtered")
-		print(id_input)
-		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
+			print(N_airbnb)
+
+		#Change of filter (Restaurants)
+		if (id_input == 'res_filter_graph') and ('xaxis.range' in layout_graph_res.keys()):
+			print("Restaurant filter UPDATE")
+			Map_data.Filter_class.update_res(res_filt_res, layout_graph_res['xaxis.range']) #Update the filtering class
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+
+		#Change of filter (Airbnb)
+		if (id_input == 'air_filter_graph') and ('xaxis.range' in layout_graph_air.keys()):
+			print("Airbnb filter UPDATE")
+			Map_data.Filter_class.update_air(res_filt_air, layout_graph_air['xaxis.range'])
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+
+		
+		return Map_data_list, output_btn, style, Map_data.Show, Mini, N_airbnb, ""
 
 	#Switch advanced<->map and hide control bulk
+	# TODO: Remove the extra ctrl pages (Unnecessary)
 	@app.callback(
 		[Output('map_div', 'style'),  #Style of the map div
 		 Output('ctrl_div_res', 'style'),
@@ -142,7 +169,7 @@ if __name__ == '__main__':
 		else:
 			print("Not clicked")
 
-		if Data_saved.n_clicked_ctrl%2 ==0:#Map is shown
+		if Data_saved.n_clicked_ctrl%2 == 0:#Map is shown
 			Output = [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}, #Make map visible and hide the control dib
 					  {'display': 'none'}, {'display': 'none'}] # Sliders
 
@@ -150,33 +177,7 @@ if __name__ == '__main__':
 			Output = {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, \
 					 {'display': 'none'}, {'display': 'none'}
 
-
-
-		elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show != 'Restaurants'):
-			if dropdown == 'price':
-				Output = {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, \
-						 {'display': 'block'}, {'display': 'none'}
-			elif dropdown == 'service_fee':
-				Output = {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, \
-						 {'display': 'none'}, {'display': 'block'}
-
-
 		return (*Output,)
-
-	# Callback to hide/show sliders when a certain attribute is shown in the histogram
-	# @app.callback(
-	# 	[Output('ctrl_price', 'style'), #Style of the price slider
-	# 	 Output('ctrl_fee', 'style')],   #Style of service fee slider.
-	# 	[Input('dropdown', 'value')])#Input click on button of advanced controls
-	#
-	# def sliders_show(dropdown):
-	# 	if (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show == 'Restaurants') and (dropdown == 'price'):
-	# 		Output = [{'display': 'block'}, {'display': 'none'}]
-	#
-	# 	elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show != 'Restaurants') and (dropdown == 'service_fee'):
-	# 		Output = [{'display': 'none'}, {'display': 'block'}]
-	#
-	# 	return (*Output,)
 
 	@app.callback([Output("Information", "children"), #Information div
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
@@ -260,115 +261,16 @@ if __name__ == '__main__':
 			Data_saved.update_click_feature(feature)#Update the feature clicked
 		return None
 
+	# Switch from column in the left filtering graph (AIRBNB)
+	@app.callback(Output('air_filter_graph', 'figure'),
+				  Input('air_filter_drop', 'value'))
+	def change_filter_columns(new_column):
+		return range_slider(Map_data.df_air, new_column)
 
-	@app.callback(Output('graph', 'figure'),
-				  Input('slider_price', 'value'),
-				  Input('slider_fee', 'value'),
-				  Input('dropdown', 'value'))
-	def controls_air(slider_price, slider_fee, dropdown):
-		data_air = Map_data.df_air
-
-		if dropdown == 'price':
-			nBins = Map_data.Bins_price
-
-		else:
-			nBins = Map_data.Bins_fee
-
-		fig = px.histogram(data_air,
-						   x= dropdown,  # 'price',
-						   range_x=[min(data_air[dropdown]), max(data_air[dropdown])],
-						   nbins=nBins,
-						   )
-
-		# Code to make selected boundaries visible on the histogram
-		if dropdown == 'price':
-			fig.add_vline(x=slider_price[0], line_dash='dash', line_color='black') #x=slider_price[0]
-			fig.add_vline(x=slider_price[1], line_dash='dash', line_color='black')
-			fig.add_vrect(x0=slider_price[0], x1=slider_price[1],
-				  annotation_text="Selected Area", annotation_position="top",
-				  fillcolor="red", opacity=0.25, line_width=0)
-			fig.update_layout(title={"text": "Price Distribution", "x": 0.5}, yaxis_title="Number of Listings")
-
-			return fig
-
-		else:
-			fig.add_vline(x=slider_fee[0], line_dash='dash', line_color='black')
-			fig.add_vline(x=slider_fee[1], line_dash='dash', line_color='black')
-			fig.add_vrect(x0=slider_fee[0], x1=slider_fee[1],
-					  annotation_text="Selected Area", annotation_position="top",
-					  fillcolor="red", opacity=0.25, line_width=0)
-			fig.update_layout(title={"text": "Service Fee Distribution", "x": 0.5}, yaxis_title="Number of Listings")
-			return fig
-
-
-	# @app.callback(Output('bar_grade', 'figure'),
-	# 			  Input('checklist', 'value'))
-	#
-	# def controls_res(checklist):
-	#
-	# 	data_res = Map_data.df_res
-	# 	res_col = data_res['GRADE'].value_counts().rename_axis('Grade').to_frame(
-	# 		'counts')  # Creating extra dataframe for grades frequencies.
-	# 	res_col['GRADE'] = ['A', 'U', 'B', 'C']
-	#
-	# 	if checklist == ['A', 'B', 'C', 'U']:
-	# 		fig = px.histogram(res_col,
-	# 						   x='GRADE',
-	# 						   y = 'counts')
-	# 	else:
-	# 		data_res['rem'] = data_res['GRADE'].unique() == checklist
-	# 		# show = data_res.loc[data_res['GRADE'] != checklist]
-	# 		fig = px.histogram(data_res,
-	# 						   x='rem',
-	# 						   y='counts')
-	#
-	# 	# else
-	# 	# 	for x in range(0, len(checklist)):
-	# 	# 		remainder = ['A', 'B', 'C', 'U']
-	# 	# 		remainder = ['A', 'B', 'C', 'U'].remove(checklist[x])
-	# 	# 		for i in range(0, len(remainder)):
-	# 	# 			show = data_res.drop(data_res[data_res['GRADE'] == remainder[i]].index)
-	# 	# 			fig = px.histogram(show,
-	# 	# 					   		x='GRADE')
-	#
-	# 	# if checklist == ['A', 'B', 'C', 'U']:
-	# 	# 	fig = px.histogram(data_res,
-	# 	# 					   x='GRADE')
-	# 	#
-	# 	# elif checklist == ['A', 'B', 'C']:
-	# 	# 	show = data_res.drop(data_res[data_res['GRADE'] == 'U'].index)
-	# 	# 	fig = px.histogram(show,
-	# 	# 					   x='GRADE')
-	# 	#
-	# 	# elif checklist == ['A', 'B']:
-	# 	# 	show = data_res.drop(data_res[data_res['GRADE'] == ['U', 'C']].index)
-	# 	# 	fig = px.histogram(show,
-	# 	# 					   x='GRADE')
-	#
-	#
-	#
-	# 	return fig
-
-
-	@app.callback(Output('score_graph', 'figure'),
-				  Input('slider_score', 'value'))
-
-	def score_control(slider_score):
-		data_res = Map_data.df_res
-
-		fig = px.histogram(data_res,
-						   x = 'SCORE',
-						   range_x=[min(data_res['SCORE']), max(data_res['SCORE'])],
-						   nbins=Map_data.Bins_score,
-						   )
-
-		fig.add_vline(x=slider_score[0], line_dash='dash', line_color='black')
-		fig.add_vline(x=slider_score[1], line_dash='dash', line_color='black')
-		fig.add_vrect(x0=slider_score[0], x1=slider_score[1],
-				  	annotation_text="Selected Area", annotation_position="top",
-				  	fillcolor="red", opacity=0.25, line_width=0)
-		fig.update_layout(title={"text": "Score Distribution", "x": 0.5}, yaxis_title="Number of Restaurants")
-
-		return fig
+	# Switch from column in the left filtering graph (RESTAURANTS)
+	@app.callback(Output('res_filter_graph', 'figure'),
+				  Input('res_filter_drop', 'value'))
+	def change_filter_columns(new_column):
+		return range_slider(Map_data.df_res, new_column)
 
 	app.run_server(debug=False, dev_tools_ui=False)#Run the website

@@ -23,6 +23,11 @@ hr {
     color: white;
     bottom:2%;
 }
+
+#loading-output{
+	margin-top:40px
+}
+
 .btn-wrapper{
     top:98%;
     bottom: 2%;
@@ -36,7 +41,7 @@ hr {
 }
 
 #left-column {
-    padding: 20px 2rem;
+    padding: 0px 0rem;
     display: flex;
     flex-direction: column;
     min-height: 100vh;

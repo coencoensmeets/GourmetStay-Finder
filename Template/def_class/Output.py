@@ -26,6 +26,11 @@ def generate_output():
             	html.Div(id='Nairbnb',children='Airbnbs in region: ')
             ]
             ),
+			dcc.Loading(
+			id="loading-1",
+            type="default",
+            children=html.Div(id="loading-output")
+        	),
 
         ], style={"textAlign": "float-left"}
     )

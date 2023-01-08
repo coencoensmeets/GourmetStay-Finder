@@ -11,12 +11,42 @@ import plotly.express as px
 
 import copy
 
+class filtering_limits():
+	def __init__(self, df_air, df_res):
+		self.air_columns = ['price', 'service_fee', 'minimum_nights','Construction_year', 'number_of_reviews', 'calculated_host_listings_count']
+		self.res_columns = ['SCORE']
+
+		self.air_limits = {k: [df_air[k].min(), df_air[k].max()] for k in self.air_columns}
+		self.res_limits = {k: [df_res[k].min(), df_res[k].max()] for k in self.res_columns}
+
+	def update_air(self, column, range):
+		self.air_limits[column] = range
+	
+	def update_res (self, column, range):
+		self.res_limits[column] = range
+
+def filter_data(geojson_feat, filter, bounds=[[-100,-100],[100,100]]): #-73.9778886, 40.7635365
+	T_start = time.perf_counter()
+	List = []
+	for data in geojson_feat:
+		conditions = [
+			data['geometry']['coordinates'][0]>=bounds[0][1],
+			data['geometry']['coordinates'][1]>=bounds[0][0],
+			data['geometry']['coordinates'][0]<=bounds[1][1],
+			data['geometry']['coordinates'][1]<=bounds[1][0]
+		]
+		for k, v in filter:
+			conditions.extend([data['properties'][k] >= v[0], data['properties'][k]<= v[1]])
+
+		if all(conditions):
+			List.append(data)
+	print("Time it took to filter: {}".format(time.perf_counter()-T_start))
+	return List
+
 
 def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
-	df = Map_data.df_air
-	Count = df[(bounds[0][1]<df['long'])&(df['long']<bounds[1][1])
-		&(bounds[0][0]<df['lat'])&(df['lat']<bounds[1][0])].shape[0]
-	return Count
+	N_air = len(filter_data(Map_data.geojson_air['features'], Map_data.Filter_class.air_limits.items(), bounds))
+	return N_air
 
 def import_restaurants():#importing the restaurant data
 	data = pd.read_csv('RestaurantsNew.csv')
@@ -76,10 +106,11 @@ def import_airbnb():
 	return data
 
 def df_to_geojson(df, long):#convert pandas dataframe to geojson
+	print("Start Converting to geojson", end="\r\r")
 	T_start = time.perf_counter()#start timer
 	dicts = df.to_dict('rows')
 	geojson = dlx.dicts_to_geojson(dicts, lon=long)  # convert to geojson
-	print("Time elapsed: {}".format(time.perf_counter()-T_start))
+	print("Time elapsed to convert to geojson: {}s".format(time.perf_counter()-T_start))
 	return geojson
 
 
@@ -105,6 +136,9 @@ class Map():
 		self.res_col['GRADE'] = ['A', 'B', 'C', 'U']
 		self.geojson_res = df_to_geojson(self.df_res, 'lon')
 		self.geojson_air = df_to_geojson(self.df_air, 'long')
+
+		self.Filter_class = filtering_limits(self.df_air, self.df_res)
+
 		self.Bins_price = 50
 		self.Bins_fee = 40
 		self.Bins_score = 25
@@ -115,7 +149,6 @@ class Map():
 		self.Show = "Restaurants"
 		self.filter = assign("function(feature, context){{return true;}}")
 		map_data = self.update()
-		self.int_col = ['price', 'service_fee']
 
 		# Initial polygon creation for the minimap
 		polygon = dl.Polygon(color="#ff7800", weight=1, positions=[[40.43963107298772,-74.21127319335939], [40.43963107298772,-73.7889862060547], [40.95967830900992,-73.7889862060547], 
@@ -149,80 +182,6 @@ class Map():
 					])
 				],
 			),
-
-			#AirBnB Controls Objects
-			html.Div(id='ctrl_div_air', style={'display': 'none'}, children=[
-							html.Div(id='legality', style={'display': 'block'}, children=[
-							html.Center(children=[
-							html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
-							html.Hr(),
-							html.P("Legality Warning:"),
-							dcc.RadioItems(['Warning On', 'Warning Off'],
-								   'Warning Off',
-								   inline=True,
-								   id='legality_radio')
-							])
-							]),
-						 	 html.Div(id='ctrl_adv', children=[
-							 # html.H4("Advanced controls", style={'margin-left': '1.5rem'}),
-							 # html.Hr(),
-							 dcc.Dropdown(self.int_col,
-                						  'price',
-               							id='dropdown',
-            							 ),
-							 dcc.Graph(id='graph'),
-							 ]),
-							 html.Div(id='ctrl_price', style={'display': 'block'},  children=[
-							 html.P("Price Slider:"),
-							 dcc.RangeSlider(min = min(self.df_air['price']),
-											 max = max(self.df_air['price']),
-											 step = self.Bins_price,
-											 value=[min(self.df_air['price']), max(self.df_air['price'])],
-											 tooltip={"placement": "top", "always_visible": True},
-											 allowCross=False,
-											 id='slider_price'
-											 )]),
-				            html.Div(id='ctrl_fee', style={'display': 'block'}, children=[
-							html.P("Service Fee Slider:"),
-							dcc.RangeSlider(min = min(self.df_air['service_fee']),
-											max = max(self.df_air['service_fee']),
-											step = self.Bins_fee,
-											value=[min(self.df_air['service_fee']), max(self.df_air['service_fee'])],
-											tooltip={"placement": "top", "always_visible": True},
-											allowCross=False,
-											id='slider_fee'
-											)]),
-
-							]),
-
-			# Restaurants Control Objects
-			html.Div(id='ctrl_div_res', style={'display': 'none'}, children=[
-				html.P("Grade Control:"),
-				dcc.Graph(id='bar_grade'),
-				dcc.Checklist(
-					id="checklist",
-					options=[
-						{'label': 'A', 'value': 'A'},
-						{'label': 'B', 'value': 'B'},
-						{'label': 'C', 'value': 'C'},
-						{'label': 'U', 'value': 'U'},
-					],
-					value=['A', 'B', 'C', 'U'],
-					labelStyle={"display": "inline-block"},
-				),
-				html.P("Score Control:"),
-				dcc.Graph(id='score_graph', figure = px.histogram(self.df_res, x="SCORE", nbins=self.Bins_score)),
-				dcc.RangeSlider(min=min(self.df_res['SCORE']),
-								max=max(self.df_res['SCORE']),
-								step = 9,
-								value=[min(self.df_res['SCORE']), max(self.df_res['SCORE'])],
-								tooltip={"placement": "top", "always_visible": True},
-								allowCross=False,
-								id='slider_score'
-								),
-			])
-
-
 		]
 
 	#Switch from restaurant to airbnb map
@@ -247,17 +206,12 @@ class Map():
 
 	#Get the html of the map
 	def update(self):
-		return [
-				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
-				# dl.GestureHandling(),#Adds ctrl to zoom
-				dl.GeoJSON(data=self.Data,cluster=True, id="markers", zoomToBoundsOnClick=True,
-							superClusterOptions={"radius": 400,"minPoints":20},
-							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),]
+		if self.Show=='Restaurants':
+			self.Data['features'] = filter_data(self.geojson_res['features'], self.Filter_class.res_limits.items())
 
-	def update_filter(self,price_range): #Price filter for AirBnBs
-		if self.Show =="Airbnbs":
-			self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if (data['properties']['price'] >= price_range[0] and data['properties']['price'] <= price_range[1])])
-			#print("Time to filter: {}".format(time.perf_counter() - T_start))
+		else:
+			self.Data['features'] = filter_data(self.geojson_air['features'], self.Filter_class.air_limits.items())
+
 		return [
 				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
 				# dl.GestureHandling(),#Adds ctrl to zoom
