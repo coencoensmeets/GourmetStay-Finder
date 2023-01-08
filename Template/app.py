@@ -1,13 +1,22 @@
 import dash
-from dash import dcc
-from dash import html
-from def_class.menu import make_menu_layout
+from dash import dcc, html, ctx
+from def_class.menu import make_menu_layout, range_slider
 import def_class.Middle as Map
 from def_class.Output import make_output_layout
 
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import numpy as np
+import plotly.express as px
 import json
+
+
+# Remove pandas warnings and surpresses DASH GET and POST outputs
+import warnings
+warnings.filterwarnings("ignore")
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 
 #Saving data throughout the main interactions of the program. 
 class Save_data():
@@ -34,6 +43,7 @@ class Save_data():
 		self.feature = feature
 
 if __name__ == '__main__':
+	print("Loading entire back-end system\n---This can take a few seconds")
 	#---Main Setup---
 	app = dash.Dash(__name__)
 	app.title = "Group 44"
@@ -52,16 +62,14 @@ if __name__ == '__main__':
 
 				id="left-column",
 				className="two columns",
-				children=make_menu_layout()
+				children=make_menu_layout(Map_data)
 			),
-
 			# Middle column
 			html.Div(
 				id="middle-column",
 				className="eight columns",
 				children=Map_data.html_div
 			),
-
 			html.Div(
 
 				id="right-column",
@@ -80,57 +88,96 @@ if __name__ == '__main__':
 		Output('data_showing', 'children'),#"Currently showing ... map" text
 		Output('mini-map', 'children'),#Minimap component
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
-		],[
+		Output('loading-output', 'value'),
+		],
+		[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
-		Input('map', 'bounds'),]#The bounds of the map input (Bounds)
+		Input('map', 'bounds'),#The bounds of the map input (Bounds)
+		Input('res_filter_graph', 'relayoutData'),
+		Input('air_filter_graph', 'relayoutData')],
+		[
+		State(component_id ='map', component_property='children'),
+		State('btn-switch', 'children'),
+		State('btn-switch', 'style'),
+		State('mini-map', 'children'),
+		State('Nairbnb', 'children'),
+		State('res_filter_drop', 'value'),
+		State('air_filter_drop', 'value')]
 		)
-	def update_map(N, bounds):
-		if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
-			print("Switch")
-			Map_data_list = Map_data.switch()#Get the new html data for the new map
-			Data_saved.update_clicked()#Update the saved click counter
-		else:#When the page is loaded and button is not clicked
-			print("Do not switch")
-			Map_data_list = Map_data.update()#Get the html data for the new map (Not switched)
+	def update_map(N, bounds,layout_graph_res,layout_graph_air, Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air):
+		id_input = ctx.triggered_id
+		if (id_input=='btn-switch'):
+			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
+				print("Switch")
+				Map_data_list = Map_data.switch()#Get the new html data for the new map
+				Data_saved.update_clicked()#Update the saved click counter
 
-		Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
-		Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-		N_airbnb = "Airbnbs in visible region: {}".format(Count)
+				if Map_data.Show =='Restaurants':#If the restaurants are shown
+					output_btn = "Show AirBnBs"
+					style = {'border-color':'black','color':'black'}#Change the colour of the button to be visible on the background
+					feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
+					if bool(feature):#Check whether a feature has been clicked upon
+						if not feature['properties']['cluster']:#Check whether it is not a cluster
+							geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
+							Map_data_list.append(geojsonlast)
 
-		if Map_data.Show =='Restaurants':#If the restaurants are shown
-			output_btn = "Show AirBnBs"
-			style = {'border-color':'black',
-				'color':'black'} #Change the colour of the button to be visible on the background
-			feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
-			if bool(feature):#Check whether a feature has been clicked upon
-				if not feature['properties']['cluster']:#Check whether it is not a cluster
-					geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
-					Map_data_list.append(geojsonlast)
+				else:#Checks whether Airbnbs are shown
+					output_btn = "Show Restaurants"
+					style = {'border-color':'white',
+						'color':'white'}#change colour of button to be visible on background
+		if (id_input=='map'):
+			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			print(N_airbnb)
 
-		else:#Checks whether Airbnbs are shown
-			output_btn = "Show Restaurants"
-			style = {'border-color':'white',
-				'color':'white'}#change colour of button to be visible on background
+		#Change of filter (Restaurants)
+		if (id_input == 'res_filter_graph') and ('xaxis.range' in layout_graph_res.keys()):
+			print("Restaurant filter UPDATE")
+			Map_data.Filter_class.update_res(res_filt_res, layout_graph_res['xaxis.range']) #Update the filtering class
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
 
-		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
+		#Change of filter (Airbnb)
+		if (id_input == 'air_filter_graph') and ('xaxis.range' in layout_graph_air.keys()):
+			print("Airbnb filter UPDATE")
+			Map_data.Filter_class.update_air(res_filt_air, layout_graph_air['xaxis.range'])
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
 
-	#Switch advanced<->map
+		
+		return Map_data_list, output_btn, style, Map_data.Show, Mini, N_airbnb, ""
+
+	#Switch advanced<->map and hide control bulk
+	# TODO: Remove the extra ctrl pages (Unnecessary)
 	@app.callback(
-		[Output('map_div', 'style'),#Style of the map div
-		Output('ctrl_div', 'style')],#Style of the ctrl div
-		[Input('btn-controls', 'n_clicks')])#Input click on button of advanced controls
-	def switch_map_advanced(N):
+		[Output('map_div', 'style'),  #Style of the map div
+		 Output('ctrl_div_res', 'style'),
+		 Output('ctrl_div_air', 'style'),
+		 Output('ctrl_price', 'style'),  # Style of the price slider
+		 Output('ctrl_fee', 'style')
+		 ],#Style of the ctrl div
+		[Input('btn-controls', 'n_clicks'),
+		 Input('dropdown', 'value')])#Input click on button of advanced controls
+
+	def switch_map_advanced(N, dropdown):
 		if N!= Data_saved.n_clicked_ctrl and N!=0:#Checks whether the button has been clicked and not the loading of the page
 			print("Clicked")
 			Data_saved.update_clicked_ctrl()#Update the click counter
 		else:
 			print("Not clicked")
 
-		if Data_saved.n_clicked_ctrl%2 ==0:#Map is shown
-			Output = [{'display': 'block'}, {'display': 'none'}]#Make map visible and hide the control dib
-		else:#Control is shown
-			Output = {'display': 'none'}, {'display': 'block'}#Hide map and make control div visible
-		return (*Output,)		
+		if Data_saved.n_clicked_ctrl%2 == 0:#Map is shown
+			Output = [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}, #Make map visible and hide the control dib
+					  {'display': 'none'}, {'display': 'none'}] # Sliders
+
+		elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show == 'Restaurants'):
+			Output = {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, \
+					 {'display': 'none'}, {'display': 'none'}
+
+		return (*Output,)
 
 	@app.callback([Output("Information", "children"), #Information div
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
@@ -149,7 +196,7 @@ if __name__ == '__main__':
 					html.B("NOT SELECTED"),
 					html.P("Name: {}".format(str(hover_feature['properties']['DBA']).lower())),
 					html.P("Score: {}".format(hover_feature['properties']['SCORE'])),
-					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE DESCRIPTION'])),
+					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE_DESCRIPTION'])),
 					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
 						hover_feature['properties']['DBA'],
 						hover_feature['properties']['BUILDING'],
@@ -166,7 +213,7 @@ if __name__ == '__main__':
 					html.B("NOT SELECTED"),
 					html.P("Name: {}".format(str(hover_feature['properties']['NAME']).lower())),
 					html.P("Price: {}".format(hover_feature['properties']['price'])),
-					html.P("Rating: {}".format(hover_feature['properties']['review rate number']))
+					html.P("Rating: {}".format(hover_feature['properties']['review_rate_number']))
 				]
 				Data_saved.update_hover(Output)  # Updates last hover feature
 				return Data_saved.Data, Data_saved.Data[0:4]
@@ -180,7 +227,7 @@ if __name__ == '__main__':
 					html.B("SELECTED"),
 					html.P("Name: {}".format(str(click_feature['properties']['DBA']).lower())),
 					html.P("Score: {}".format(click_feature['properties']['SCORE'])),
-					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE DESCRIPTION'])),
+					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE_DESCRIPTION'])),
 					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
 						click_feature['properties']['DBA'],
 						click_feature['properties']['BUILDING'],
@@ -197,7 +244,7 @@ if __name__ == '__main__':
 					html.B("SELECTED"),
 					html.P("Name: {}".format(str(click_feature['properties']['NAME']).lower())),
 					html.P("Price: {}".format(click_feature['properties']['price'])),
-					html.P("Rating: {}".format(click_feature['properties']['review rate number']))
+					html.P("Rating: {}".format(click_feature['properties']['review_rate_number']))
 				]
 				Data_saved.update_click(Output)  # Updates last hover feature
 				return Data_saved.Data, Data_saved.Data[0:4]
@@ -213,5 +260,17 @@ if __name__ == '__main__':
 		elif Map_data.Show!="Restaurants":#If the airbnbs are shown
 			Data_saved.update_click_feature(feature)#Update the feature clicked
 		return None
+
+	# Switch from column in the left filtering graph (AIRBNB)
+	@app.callback(Output('air_filter_graph', 'figure'),
+				  Input('air_filter_drop', 'value'))
+	def change_filter_columns(new_column):
+		return range_slider(Map_data.df_air, new_column)
+
+	# Switch from column in the left filtering graph (RESTAURANTS)
+	@app.callback(Output('res_filter_graph', 'figure'),
+				  Input('res_filter_drop', 'value'))
+	def change_filter_columns(new_column):
+		return range_slider(Map_data.df_res, new_column)
 
 	app.run_server(debug=False, dev_tools_ui=False)#Run the website
