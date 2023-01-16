@@ -85,18 +85,32 @@ if __name__ == '__main__':
 		],[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
 		Input('map', 'bounds'),#The bounds of the map input (Bounds)
+<<<<<<< Updated upstream
 		Input('slider_price','value')],#Price slider values
 		[State(component_id ='map', component_property='children'),
+=======
+		Input('res_filter_graph', 'relayoutData'),
+		Input('air_filter_graph', 'relayoutData'),
+		Input('cat_air_checklist','value'),
+		Input('cat_air_drop','value'),
+		Input('reset_button','n_clicks')],
+		[
+		State(component_id ='map', component_property='children'),
+>>>>>>> Stashed changes
 		State('btn-switch', 'children'),
 		State('btn-switch', 'style'),
 		State('mini-map', 'children'),
 		State('Nairbnb', 'children')]
 		)
+<<<<<<< Updated upstream
 	def update_map(N, bounds, slider_price, Map_data_list, output_btn, style, Mini, N_airbnb):
 		print(slider_price)
+=======
+	def update_map(N, bounds,layout_graph_res,layout_graph_air, cat_air_chosen, cat_air,reset_air, Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air):
+>>>>>>> Stashed changes
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
-			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
+			if N!= Data_saved.n_clicked and N!=0:#Checks whether the bu	tton has been clicked and not the loading of the page
 				print("Switch")
 				Map_data_list = Map_data.switch()#Get the new html data for the new map
 				Data_saved.update_clicked()#Update the saved click counter
@@ -125,7 +139,47 @@ if __name__ == '__main__':
 		print(id_input)
 		return Map_data_list, output_btn, style,Map_data.Show, Mini, N_airbnb
 
+<<<<<<< Updated upstream
 	#Switch advanced<->map
+=======
+		#Change of filter (Restaurants)
+		if (id_input == 'res_filter_graph') and ('xaxis.range' in layout_graph_res.keys()):
+			print("Restaurant filter UPDATE")
+			Map_data.Filter_class.update_res(res_filt_res, layout_graph_res['xaxis.range']) #Update the filtering class
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+
+		#Change of filter (Airbnb)
+		if (id_input == 'air_filter_graph') and ('xaxis.range' in layout_graph_air.keys()):
+			print("Airbnb filter UPDATE")
+			Map_data.Filter_class.update_air(res_filt_air, layout_graph_air['xaxis.range'])
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+
+		#Change of categorical filter (Airbnb)
+		if id_input == 'cat_air_checklist':
+			print("Categorical Airbnb UPDATE")
+			Map_data.Cat_Filter_class.update_cat_air(cat_air,cat_air_chosen)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+		#Reset of categorical filter (AirBnb)
+		if id_input == 'reset_button':
+			print("Reset Categorical AIRBNB")
+			Map_data.Cat_Filter_class.update_cat_air(None,None)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+
+
+		
+		return Map_data_list, output_btn, style, Map_data.Show, Mini, N_airbnb, ""
+
+	#Switch advanced<->map and hide control bulk
+	# TODO: Remove the extra ctrl pages (Unnecessary)
+>>>>>>> Stashed changes
 	@app.callback(
 		[Output('map_div', 'style'),#Style of the map div
 		Output('ctrl_div', 'style')],#Style of the ctrl div
@@ -238,5 +292,48 @@ if __name__ == '__main__':
 						   labels={'x':'Price', 'y':'Count of Listings'},
 						   title = 'Interactive Price Distribution')
 		return fig
+
+	#Switch the categorical variable wanted to be filtered (AIRBNB)
+	@app.callback([Output('cat_air_checklist','options'),
+				   Output('cat_air_checklist','value')],
+				   [Input('cat_air_drop','value'),
+					Input('reset_button','n_clicks')])
+	def change_checkedlist(new_cat,reset):
+		id_input = ctx.triggered_id
+		if new_cat == None:
+			return [],[]
+		elif id_input == 'reset_button':
+			return [],[]
+		else:
+			return Map_data.Cat_Filter_class.air_cat_options[new_cat], Map_data.Cat_Filter_class.air_cat_chosen[new_cat]
+	@app.callback(Output('air_cat_on','children'),
+				  [Input('cat_air_drop','value'),
+				   Input('reset_button','n_clicks')])
+	def cat_air_status(on,off):
+		id_input = ctx.triggered_id
+		if id_input == 'cat_air_drop':
+			return 'Categorical Filtering ON'
+		else:
+			return 'Categorical Filtering OFF'
+
+	#Categorical filter reset button
+	'''@app.callback([Output('cat_air_checklist','options'),
+				   Output('cat_air_checklist','value')],
+				   Input('reset_button','n_clicks'))
+	def reset_air_categorical(reset):
+		return [],[]'''
+	#Adding the button to RESET the Categorical filter
+	'''@app.callback([Output('cat_air_checklist', 'value'),
+    			  Output('all-checklist', 'value')],
+    			  [Input('cat_air_checklist', 'value'),
+    			  Input('all-checklist', 'value')])
+	def sync_checlists(cat_selected,all_selected):
+		id_input = ctx.triggered_id
+		if id_input == 'cat_air_checklist':
+			all_selected = ['All'] if set(cat_selected) == set(Map_data.Cat_Filter_class.air_cat_options) else []
+		else:
+			cat_selected = Map_data.Cat_Filter_class.air_cat_options if all_selected else []
+		return cat_selected,all_selected'''
+
 
 	app.run_server(debug=False, dev_tools_ui=False)#Run the website

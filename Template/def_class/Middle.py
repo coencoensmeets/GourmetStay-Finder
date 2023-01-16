@@ -11,12 +11,69 @@ import plotly.express as px
 
 import copy
 
+<<<<<<< Updated upstream
 
 def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
 	df = Map_data.df_air
 	Count = df[(bounds[0][1]<df['long'])&(df['long']<bounds[1][1])
 		&(bounds[0][0]<df['lat'])&(df['lat']<bounds[1][0])].shape[0]
 	return Count
+=======
+class filtering_limits():
+	def __init__(self, df_air, df_res):
+		self.air_columns = ['price', 'service_fee', 'minimum_nights','Construction_year', 'number_of_reviews', 'calculated_host_listings_count']
+		self.res_columns = ['SCORE']
+
+		self.air_limits = {k: [df_air[k].min(), df_air[k].max()] for k in self.air_columns}
+		self.res_limits = {k: [df_res[k].min(), df_res[k].max()] for k in self.res_columns}
+	def update_air(self, column, range):
+		self.air_limits[column] = range
+	
+	def update_res (self, column, range):
+		self.res_limits[column] = range
+
+class categorical_filtering():
+	def __init__(self,df_air):
+		self.air_cat_columns = ['neighbourhood_group','cancellation_policy']
+		self.air_cat_options = {k: df_air[k].unique().tolist() for k in self.air_cat_columns}
+		self.air_cat_chosen = {k: df_air[k].unique().tolist() for k in self.air_cat_columns}
+	def update_cat_air(self,column,chosen):
+		if column == None and chosen == None:
+			self.air_cat_chosen = self.air_cat_options
+		else:
+			self.air_cat_chosen[column] = chosen
+
+
+
+def filter_data(geojson_feat, filter, bounds=[[-100,-100],[100,100]]): #-73.9778886, 40.7635365
+	T_start = time.perf_counter()
+	List = []
+	for data in geojson_feat:
+		conditions = [
+			data['geometry']['coordinates'][0]>=bounds[0][1],
+			data['geometry']['coordinates'][1]>=bounds[0][0],
+			data['geometry']['coordinates'][0]<=bounds[1][1],
+			data['geometry']['coordinates'][1]<=bounds[1][0]
+		]
+		for k, v in filter:
+			if len(v) !=0:
+				if not isinstance(v[0],str):
+					conditions.extend([data['properties'][k] >= v[0], data['properties'][k]<= v[1]])
+				else:
+					conditions.extend([data['properties'][k] in v])
+			else:
+				conditions.extend([data['properties'][k] in v])
+		if all(conditions):
+			List.append(data)
+	print("Time it took to filter: {}".format(time.perf_counter()-T_start))
+	return List
+
+
+def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
+	N_air = len(filter_data(Map_data.geojson_air['features'], Map_data.Filter_class.air_limits.items(), bounds))
+	print(Map_data.Filter_class.air_limits.items())
+	return N_air
+>>>>>>> Stashed changes
 
 def import_restaurants():#importing the restaurant data
 	data = pd.read_csv('RestaurantsNew.csv')
@@ -86,6 +143,16 @@ class Map():
 		self.geojson_res = df_to_geojson(self.df_res, 'lon')
 		self.geojson_air = df_to_geojson(self.df_air, 'long')
 
+<<<<<<< Updated upstream
+=======
+		self.Filter_class = filtering_limits(self.df_air, self.df_res)
+		self.Cat_Filter_class = categorical_filtering(self.df_air)
+
+		self.Bins_price = 50
+		self.Bins_fee = 40
+		self.Bins_score = 25
+
+>>>>>>> Stashed changes
 		self.url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png' #The style of the map
 		self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '#Add reference to the styling of the map 
 		self.Data = copy.deepcopy(self.geojson_res)
@@ -164,12 +231,21 @@ class Map():
 
 	#Get the html of the map
 	def update(self):
+<<<<<<< Updated upstream
 		return [
 				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
 				# dl.GestureHandling(),#Adds ctrl to zoom
 				dl.GeoJSON(data=self.Data,cluster=True, id="markers", zoomToBoundsOnClick=True,
 							superClusterOptions={"radius": 400,"minPoints":20},
 							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),]
+=======
+		if self.Show=='Restaurants':
+			self.Data['features'] = filter_data(self.geojson_res['features'], self.Filter_class.res_limits.items())
+
+		else:
+			self.Data['features'] = filter_data(self.geojson_air['features'], self.Filter_class.air_limits.items())
+			self.Data['features'] = filter_data(self.geojson_air['features'], self.Cat_Filter_class.air_cat_chosen.items())
+>>>>>>> Stashed changes
 
 	def update_filter(self,price_range): #Price filter for AirBnBs
 		if self.Show =="Airbnbs":
