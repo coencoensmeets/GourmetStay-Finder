@@ -8,6 +8,7 @@ import time
 import numpy as np
 import dash_daq as daq
 import plotly.express as px
+import plotly.graph_objects as go
 
 import copy
 
@@ -37,12 +38,11 @@ def filter_data(geojson_feat, filter, bounds=[[-100,-100],[100,100]]): #-73.9778
 		]
 		for k, v in filter:
 			conditions.extend([data['properties'][k] >= v[0], data['properties'][k]<= v[1]])
-
+		
 		if all(conditions):
 			List.append(data)
 	print("Time it took to filter: {}".format(time.perf_counter()-T_start))
 	return List
-
 
 def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
 	N_air = len(filter_data(Map_data.geojson_air['features'], Map_data.Filter_class.air_limits.items(), bounds))
@@ -77,7 +77,7 @@ def import_restaurants():#importing the restaurant data
 
 def import_airbnb():
 	data = pd.read_csv('airbnb_open_data.csv') #importing the airbnb Data
-	# data = data[1:5000] #Line only for testing to save time
+	data = data[1:5000] #Line only for testing to save time
 	data = data[data['long'].notna()]
 	data = data[data['lat'].notna()]
 
@@ -117,7 +117,7 @@ def df_to_geojson(df, long):#convert pandas dataframe to geojson
 def get_house_data(feature):#Create the html data for house icon on restaurant map
 	features = [dict(name=feature['properties']['NAME'], lat=feature['geometry']['coordinates'][1], lon=feature['geometry']['coordinates'][0])]
 	# Generate geojson with a marker for each country and name as tooltip.
-	print(features)
+	# print(features)
 	geojsonhouse = dlx.dicts_to_geojson([{**feat, **dict(tooltip=feat['name'])} for feat in features])
 	draw_flag = assign("""function(feature, latlng){
 	const flag = L.icon({iconUrl: `https://www.shareicon.net/download/2015/12/20/690629_home_512x512.png`, iconSize: [70, 60]});
@@ -175,30 +175,30 @@ class Map():
 						dl.GeoJSON(data=self.Data,cluster=True, id="markers", zoomToBoundsOnClick=True,
 									superClusterOptions={"radius": 400,"minPoints":20},
 							children=[html.Div(id='hide_tooltip',children=[dl.Tooltip(id="tooltip")])]),
-					], center=(40.7, -74), zoom=11, style={'width': '100%', 'height': '100%', 'display': 'inline-block', 'position': 'absolute', 'z-index': '1'}, id='map'),
+					], center=(40.7, -74), zoom=11, style={'width': '100%', 'height': '100%', 'display': 'inline-block', 'position': 'absolute', 'z-index': '2'}, id='map'),
 					# html.H6('Switch', id='btn-switch'),
 					html.Div(className='btn-wrapper',children=[
-						html.Button('Show Airbnbs', id='btn-switch', n_clicks=0),
+						html.Button('Show Airbnbs', id='btn-switch', n_clicks=0, style={'border-color':'black','color':'black', 'z-index': '3'}),
 					])
 				],
 			),
+			html.Div(
+				id='adv_ctrl_div',
+				style={'Display': 'none'},
+				className = "graph_card",
+				children=[dcc.Graph(figure=self.get_fig_pcp(), id='pcp_id')]
+			)
 		]
 
 	#Switch from restaurant to airbnb map
 	def switch(self):
 		if self.Show=="Restaurants":
-			T_start = time.perf_counter()
-			# print(self.geojson_air['features'])
-			#self.Data['features'] = copy.deepcopy([data for data in self.geojson_air['features'] if data['properties']['price']>1000])
 			self.Data = copy.copy(self.geojson_air)
-			#self.Data = self.geojson_air
-			print("Time to filter: {}".format(time.perf_counter()-T_start))
 			self.Show = "Airbnbs"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 			self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
 		else:
-			#self.Data = copy.copy(self.geojson_res)
-			self.data = self.geojson_res
+			self.data = copy.copy(self.geojson_res)
 			self.Show = "Restaurants"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 			self.attribution=False
@@ -227,4 +227,51 @@ class Map():
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 		return [dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
 						self.inner_ring]
+
+	def get_fig_pcp(self):
+		df_interest = self.df_air[self.Filter_class.air_columns]
+
+		fig = go.Figure(data=
+			go.Parcoords(
+				line = dict(color = df_interest['price'],
+						colorscale =px.colors.sequential.algae,
+						showscale = True,
+						cmin = 1200,
+						cmax = 30),
+				dimensions = list([
+					dict(constraintrange = [self.Filter_class.air_limits['price'][0],self.Filter_class.air_limits['price'][1]],
+						label = 'Price', values = df_interest['price']),
+
+					dict(constraintrange = [self.Filter_class.air_limits['service_fee'][0],self.Filter_class.air_limits['service_fee'][1]],
+						label = 'Service Fee', values = df_interest['service_fee']),
+
+					dict(constraintrange = [self.Filter_class.air_limits['minimum_nights'][0],self.Filter_class.air_limits['minimum_nights'][1]],
+						range = [0, 6000],
+						# Option to create Unknown on the plot for the user
+						tickvals = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000],
+						ticktext = ['0', '500', '1000', '1500', '2000', '2500', '3000', '3500', '4000', '4500', '5000', '5500', 'Unknown'],
+						label = 'Minimum Nights', values = df_interest['minimum_nights']),
+
+					dict(constraintrange = [self.Filter_class.air_limits['Construction_year'][0],self.Filter_class.air_limits['Construction_year'][1]],
+						range = [2000, max(df_interest['Construction_year'])],
+						tickvals = [2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018, 2020, 2022],
+						ticktext = ['Unknown', '2002', '2004', '2006','2008', '2010', '2012', '2014', '2016', '2018', '2020', '2022'],
+						label = 'Construction Year', values = df_interest['Construction_year']),
+
+					dict(constraintrange = [self.Filter_class.air_limits['number_of_reviews'][0],self.Filter_class.air_limits['number_of_reviews'][1]],
+						range = [0, max(df_interest['number_of_reviews'])],
+						label = 'Number of Reviews', values = df_interest['number_of_reviews'])
+				])
+				)
+			)
+
+		# Added opacity as explained in the lecture to ease readibility
+		fig.update_traces(unselected_line_opacity=0.01, selector=dict(type='parcoords'))
+
+		# Setting a very light grey background so that the white on the colorcale is better visible
+		fig.update_layout(
+			paper_bgcolor = 'hsla(186, 0%, 88%, 0.58)'
+		)
+
+		return fig
 

@@ -17,6 +17,10 @@ hr {
     margin-top:10px;
 }
 
+#adv_ctrl_div{
+	background-color:#e8e8e8
+}
+
 #btn-switch{
     position: absolute;
     z-index: 1;
@@ -51,7 +55,7 @@ hr {
     position: relative;
     padding: 0px 0rem;
     min-height: 100vh;
-    background-color: #f4f4f4;
+    background-color: #e8e8e8;
 }
 
 #right-column {

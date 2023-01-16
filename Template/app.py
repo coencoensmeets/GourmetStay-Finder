@@ -1,5 +1,6 @@
 import dash
 from dash import dcc, html, ctx
+import dash_loading_spinners as dls
 from def_class.menu import make_menu_layout, range_slider
 import def_class.Middle as Map
 from def_class.Output import make_output_layout
@@ -8,6 +9,7 @@ from dash.dependencies import Input, Output, State
 import numpy as np
 import plotly.express as px
 import json
+import re
 
 
 # Remove pandas warnings and surpresses DASH GET and POST outputs
@@ -52,11 +54,23 @@ if __name__ == '__main__':
 	Data_saved = Save_data() #Setup for the storing of data class 
 	
 	#Layout creation
-	app.layout = html.Div(
+	app.layout = html.Div(children=[
+		html.Div(
+			id="div-loading",
+			style={'display': 'inline-block', 'position': 'absolute', 'z-index': '10001'},
+			children=[
+				dls.Bars(
+					fullscreen=True, 
+					id="loading-whole-app"
+				)
+			]
+		),
+		html.Div(
 		id="app-container",  
 		children=[
 		#Hidden DIV for OUTPUT Callback
 			html.Div(id='hidden-div', style={'display':'none'}),
+			html.Div(id='hidden-div2', style={'display':'none'}),
 			# Left column
 			html.Div(
 
@@ -77,6 +91,7 @@ if __name__ == '__main__':
 				children=make_output_layout()
 			),
 		],
+	)]
 	)
 
 #------INTERACTIONS-------
@@ -89,12 +104,18 @@ if __name__ == '__main__':
 		Output('mini-map', 'children'),#Minimap component
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
 		Output('loading-output', 'value'),
+		Output('map_div', 'style'),  #Style of the map div
+		Output('adv_ctrl_div', 'style'),
+		Output('adv_ctrl_div', 'children'),
+		Output("div-loading", "children")
 		],
 		[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
 		Input('map', 'bounds'),#The bounds of the map input (Bounds)
 		Input('res_filter_graph', 'relayoutData'),
-		Input('air_filter_graph', 'relayoutData')],
+		Input('air_filter_graph', 'relayoutData'),
+		Input('btn-controls', 'n_clicks'),
+		Input('pcp_id', 'restyleData')],
 		[
 		State(component_id ='map', component_property='children'),
 		State('btn-switch', 'children'),
@@ -102,9 +123,11 @@ if __name__ == '__main__':
 		State('mini-map', 'children'),
 		State('Nairbnb', 'children'),
 		State('res_filter_drop', 'value'),
-		State('air_filter_drop', 'value')]
+		State('air_filter_drop', 'value'),
+		State('adv_ctrl_div', 'children')]
 		)
-	def update_map(N, bounds,layout_graph_res,layout_graph_air, Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air):
+	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data,
+					Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air, adv_ctrl_div):
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
 			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
@@ -146,44 +169,47 @@ if __name__ == '__main__':
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 			N_airbnb = "Airbnbs in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
+			if Data_saved.n_clicked_ctrl%2 == 1:
+				adv_ctrl_div = dcc.Graph(figure=Map_data.get_fig_pcp(), id='pcp_id')
 
+		if (id_input=='pcp_id'):
+			if pcp_data!=None:
+				Data_key = list(pcp_data[0].keys())
+				if 'constraintrange' in Data_key[0]:
+					Index_column = int(Data_key[0].split('[')[1].split("]")[0])
+					Column = Map_data.Filter_class.air_columns[Index_column]
+					Range =  list(pcp_data[0].items())[0][1][0]
+					print("Update ({}): {}".format(Column, Range))
+					Map_data.Filter_class.update_air(Column, Range)
+					Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+					N_airbnb = "Airbnbs in visible region: {}".format(Count)
+
+		#Switch to advanced and back.
+		if (id_input == 'btn-controls'):
+			if N_adv!= Data_saved.n_clicked_ctrl and N_adv!=0:#Checks whether the button has been clicked and not the loading of the page
+				print("Clicked")
+				Data_saved.update_clicked_ctrl()#Update the click counter
+			else:
+				print("Not clicked")
+
+		if Data_saved.n_clicked_ctrl%2 == 0: #Map is shown
+			Map_data_list = Map_data.update()
+			Output_style_adv = [{'display': 'block'}, {'display': 'none'}]
+
+		else: #Advanced controls will be shown
+			Output_style_adv = [{'display': 'none'}, {'display': 'block'}]
+			adv_ctrl_div = dcc.Graph(figure=Map_data.get_fig_pcp(), id='pcp_id')
 		
-		return Map_data_list, output_btn, style, Map_data.Show, Mini, N_airbnb, ""
+		return Map_data_list, output_btn, style, Map_data.Show, Mini, N_airbnb, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
 
-	#Switch advanced<->map and hide control bulk
-	# TODO: Remove the extra ctrl pages (Unnecessary)
-	@app.callback(
-		[Output('map_div', 'style'),  #Style of the map div
-		 Output('ctrl_div_res', 'style'),
-		 Output('ctrl_div_air', 'style'),
-		 Output('ctrl_price', 'style'),  # Style of the price slider
-		 Output('ctrl_fee', 'style')
-		 ],#Style of the ctrl div
-		[Input('btn-controls', 'n_clicks'),
-		 Input('dropdown', 'value')])#Input click on button of advanced controls
 
-	def switch_map_advanced(N, dropdown):
-		if N!= Data_saved.n_clicked_ctrl and N!=0:#Checks whether the button has been clicked and not the loading of the page
-			print("Clicked")
-			Data_saved.update_clicked_ctrl()#Update the click counter
-		else:
-			print("Not clicked")
-
-		if Data_saved.n_clicked_ctrl%2 == 0:#Map is shown
-			Output = [{'display': 'block'}, {'display': 'none'}, {'display': 'none'}, #Make map visible and hide the control dib
-					  {'display': 'none'}, {'display': 'none'}] # Sliders
-
-		elif (Data_saved.n_clicked_ctrl%2 !=0) and (Map_data.Show == 'Restaurants'):
-			Output = {'display': 'none'}, {'display': 'block'}, {'display': 'none'}, \
-					 {'display': 'none'}, {'display': 'none'}
-
-		return (*Output,)
 
 	@app.callback([Output("Information", "children"), #Information div
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
 		[Input("markers", "hover_feature"), #Input when a feature is hovered over
 		 Input("markers", "click_feature")]) #Input when a feature is clicked on
 	def update_tooltip(hover_feature,click_feature):
+		
 		if hover_feature is None and click_feature is None:
 			return Data_saved.Data, None  # return last information and no tooltip
 		if click_feature is None or (click_feature != hover_feature and hover_feature is not None):
@@ -269,8 +295,27 @@ if __name__ == '__main__':
 
 	# Switch from column in the left filtering graph (RESTAURANTS)
 	@app.callback(Output('res_filter_graph', 'figure'),
-				  Input('res_filter_drop', 'value'))
+				  Input('res_filter_drop', 'value'),)
 	def change_filter_columns(new_column):
 		return range_slider(Map_data.df_res, new_column)
 
-	app.run_server(debug=False, dev_tools_ui=False)#Run the website
+	# @app.callback(
+	# 	Output("div-loading", "children"),
+	# 	[
+	# 		Input("app-container", "loading_state")
+	# 	],
+	# 	[
+	# 		State("div-loading", "children"),
+	# 	]
+	# )
+	# def hide_loading_after_startup(
+	# 	loading_state, 
+	# 	children
+	# 	):
+	# 	if children:
+	# 		print("remove loading spinner!")
+	# 		return None
+	# 	print("spinner already gone!")
+	# 	raise PreventUpdate
+
+	app.run_server(debug=False)#Run the website
