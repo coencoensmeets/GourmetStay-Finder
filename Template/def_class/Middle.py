@@ -9,6 +9,7 @@ import numpy as np
 import dash_daq as daq
 import plotly.express as px
 import plotly.graph_objects as go
+from def_class.menu import create_popover
 
 import copy
 
@@ -189,6 +190,7 @@ class Map():
 		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 
+		imp_list = html.Ul(id='list', children=[html.Li('Make the cluster colours equiluminance'),html.Li('Be able to select more than one Airbnb to maintain within the restaurant graph.'),html.Li('Improvement 1')])
 		#Creation of the html div for the entire middle part.
 		self.html_div =  [
 			html.Div(
@@ -212,14 +214,15 @@ class Map():
 					# html.H6('Switch', id='btn-switch'),
 					html.Div(className='btn-wrapper',children=[
 						html.Button('Show Airbnbs', id='btn-switch', n_clicks=0, style={'border-color':'black','color':'black', 'z-index': '3'}),
-					])
+					]),
+					create_popover("Improvements", "Filter improvements", imp_list, style_button={'border-color':'black','color':'black', 'z-index': '3'}, id_text='impr_map'),
 				],
 			),
 			html.Div(
 				id='adv_ctrl_div',
 				style={'Display': 'none'},
 				className = "graph_card",
-				children=[dcc.Graph(figure=self.get_fig_pcp(), id='pcp_id')]
+				children=self.get_adv_graphs()
 			)
 		]
 
@@ -231,7 +234,7 @@ class Map():
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
 			self.attribution = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> '
 		else:
-			self.data = copy.copy(self.geojson_res)
+			self.Data = copy.copy(self.geojson_res)
 			self.Show = "Restaurants"
 			self.url='https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png'
 			self.attribution=False
@@ -260,6 +263,21 @@ class Map():
 		return [dl.TileLayer(url=self.url, maxZoom=20, attribution=self.attribution),
 						self.inner_ring]
 
+	def get_adv_graphs(self):
+		imp_list_pcp = html.Ul(children=[
+			html.Li('Improvement 1'),
+			html.Li('Improvement 1'),
+			html.Li('Improvement 1')])
+
+		imp_list_dens = html.Ul(children=[
+			html.Li('The "airbnb in visible region" maintains the viewport of the normal map not the density map.'),
+			html.Li('Improvement 1'),
+			html.Li('Improvement 1')])
+
+		return [dcc.Graph(figure=self.get_fig_pcp(), id='pcp_id', style={'height': '50vh'}),
+				dcc.Graph(figure=self.get_fig_map(), id='density_map', style={'height': '50vh'}),
+				create_popover("Improvements", "Filter improvements", imp_list_pcp, style_button={'border-color':'black','color':'black', 'z-index': '10000'},id_text='impr_pcp'),
+				create_popover("Improvements", "Filter improvements", imp_list_dens, style_button={'border-color':'black','color':'black', 'z-index': '10000'}, id_text='impr_dens'),]
 	def get_fig_pcp(self):
 		df_interest = self.df_air[self.Filter_class.air_columns]
 
@@ -302,8 +320,25 @@ class Map():
 
 		# Setting a very light grey background so that the white on the colorcale is better visible
 		fig.update_layout(
-			paper_bgcolor = 'hsla(186, 0%, 88%, 0.58)'
+			paper_bgcolor = 'hsla(186, 0%, 88%, 0.58)',uirevision='0'
 		)
 
 		return fig
+
+	def get_fig_map(self):
+		self.Data['features'] = filter_data(self.geojson_air['features'], self.Filter_class.air_limits.items())
+		data = self.geojson_to_df(copy.copy(self.Data))
+		fig = px.density_mapbox(data, lat='lat', lon='long', opacity=0.6,radius=15,
+                        center=dict(lat=40.7, lon=-74), zoom=8,
+                        mapbox_style="open-street-map")
+		fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},uirevision='0')
+		return fig
+
+	def geojson_to_df(self, data):
+		T_start = time.perf_counter()
+		df = pd.json_normalize(data["features"])
+		coords = 'geometry.coordinates'
+		df[['long','lat']] = pd.DataFrame(df[coords].tolist(), columns=['long','lat'])
+		print("Time elapsed to convert to df: {}".format(time.perf_counter()-T_start))
+		return df
 

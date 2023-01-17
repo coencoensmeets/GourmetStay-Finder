@@ -4,18 +4,16 @@ import dash_loading_spinners as dls
 from def_class.menu import make_menu_layout, range_slider
 import def_class.Middle as Map
 from def_class.Output import make_output_layout
+import dash_bootstrap_components as dbc
 
 from dash.dependencies import Input, Output, State
 import numpy as np
 import plotly.express as px
 import json
-import re
 
 
 # Remove pandas warnings and surpresses DASH GET and POST outputs
 import warnings
-
-
 warnings.filterwarnings("ignore")
 import logging
 log = logging.getLogger('werkzeug')
@@ -49,7 +47,7 @@ class Save_data():
 if __name__ == '__main__':
 	print("Loading entire back-end system\n---This can take a few seconds")
 	#---Main Setup---
-	app = dash.Dash(__name__)
+	app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 	app.title = "Group 44"
 	Map_data = Map.Map()
 
@@ -68,7 +66,8 @@ if __name__ == '__main__':
 			]
 		),
 		html.Div(
-		id="app-container",  
+		id="app-container", 
+		style={'max-height': '100%'},
 		children=[
 		#Hidden DIV for OUTPUT Callback
 			html.Div(id='hidden-div', style={'display':'none'}),
@@ -102,6 +101,7 @@ if __name__ == '__main__':
 		Output(component_id ='map', component_property='children'),#Main map component
 		Output('btn-switch', 'children'),#Text of the button (Restaurant/airbnb)
 		Output('btn-switch', 'style'),#Style of the button (White/dark)
+		Output('impr_map', 'style'),#Style of the button (White/dark)
 		Output('data_showing', 'children'),#"Currently showing ... map" text
 		Output('mini-map', 'children'),#Minimap component
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
@@ -123,7 +123,8 @@ if __name__ == '__main__':
 		Input('air_reset_button', 'n_clicks'),
 		Input('cat_res_checklist', 'value'),
 		Input('cat_res_drop', 'value'),
-		Input('res_reset_button', 'n_clicks')
+		Input('res_reset_button', 'n_clicks'),
+		Input('density_map', 'bounds')
 		],
 		[
 		State(component_id ='map', component_property='children'),
@@ -135,8 +136,10 @@ if __name__ == '__main__':
 		State('air_filter_drop', 'value'),
 		State('adv_ctrl_div', 'children')]
 		)
-	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data, cat_air_chosen, cat_air,reset_air, cat_res_chosen, cat_res, reset_res,
+	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data, 
+					cat_air_chosen, cat_air,reset_air, cat_res_chosen, cat_res, reset_res, bounds_density,
 					Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air, adv_ctrl_div):
+		cur_show = None
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
 			if N!= Data_saved.n_clicked and N!=0:#Checks whether the button has been clicked and not the loading of the page
@@ -157,6 +160,10 @@ if __name__ == '__main__':
 					output_btn = "Show Restaurants"
 					style = {'border-color':'white',
 						'color':'white'}#change colour of button to be visible on background
+				Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+				Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
+				N_airbnb = "Airbnbs in visible region: {}".format(Count)
+				print(N_airbnb)
 		if (id_input=='map'):
 			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
@@ -179,7 +186,8 @@ if __name__ == '__main__':
 			N_airbnb = "Airbnbs in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
-				adv_ctrl_div = dcc.Graph(figure=Map_data.get_fig_pcp(), id='pcp_id')
+				print(bounds_density)
+				adv_ctrl_div = Map_data.get_adv_graphs()
 
 		if id_input == 'cat_air_checklist':
 			print("Categorical Airbnb UPDATE")
@@ -187,6 +195,8 @@ if __name__ == '__main__':
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 			N_airbnb = "Airbnbs in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
+			if Data_saved.n_clicked_ctrl%2 == 1:
+				adv_ctrl_div = Map_data.get_adv_graphs()
 		#Reset of categorical filter (AirBnb)
 		if id_input == 'air_reset_button':
 			print("Reset Categorical AIRBNB")
@@ -194,6 +204,8 @@ if __name__ == '__main__':
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 			N_airbnb = "Airbnbs in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
+			if Data_saved.n_clicked_ctrl%2 == 1:
+				adv_ctrl_div = Map_data.get_adv_graphs()
 
 		if id_input == 'cat_res_checklist':
 			print("Categorical RESTAURANT UPDATE")
@@ -229,17 +241,22 @@ if __name__ == '__main__':
 			else:
 				print("Not clicked")
 
+		if (id_input== 'density_map'):
+			print(bounds_density)
+
 		if Data_saved.n_clicked_ctrl%2 == 0: #Map is shown
 			Map_data_list = Map_data.update()
 			Output_style_adv = [{'display': 'block'}, {'display': 'none'}]
 
 		else: #Advanced controls will be shown
+			cur_show = "Advanced controls (Airbnbs)"
 			Output_style_adv = [{'display': 'none'}, {'display': 'block'}]
-			adv_ctrl_div = dcc.Graph(figure=Map_data.get_fig_pcp(), id='pcp_id')
+			adv_ctrl_div = Map_data.get_adv_graphs()
+
+		if cur_show == None:
+			cur_show = Map_data.Show
 		
-		return Map_data_list, output_btn, style, Map_data.Show, Mini, N_airbnb, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
-
-
+		return Map_data_list, output_btn, style, style,cur_show, Mini, N_airbnb, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
 
 	@app.callback([Output("Information", "children"), #Information div
 		Output('tooltip', 'children')], #Tooltop (hovering extension)
@@ -385,24 +402,5 @@ if __name__ == '__main__':
 			return 'RESTAURANT Categorical Filtering ON'
 		else:
 			return 'RESTAURANT Categorical Filtering OFF'
-
-	# @app.callback(
-	# 	Output("div-loading", "children"),
-	# 	[
-	# 		Input("app-container", "loading_state")
-	# 	],
-	# 	[
-	# 		State("div-loading", "children"),
-	# 	]
-	# )
-	# def hide_loading_after_startup(
-	# 	loading_state, 
-	# 	children
-	# 	):
-	# 	if children:
-	# 		print("remove loading spinner!")
-	# 		return None
-	# 	print("spinner already gone!")
-	# 	raise PreventUpdate
 
 	app.run_server(debug=False)#Run the website

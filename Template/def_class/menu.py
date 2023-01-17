@@ -1,5 +1,30 @@
 from dash import dcc, html
 import plotly.express as px
+import dash_bootstrap_components as dbc
+import time
+
+def create_popover(button,header, text, style_button=None, id_text=str(time.perf_counter()).replace(".", ""), style_wrapper=None):
+	popovers = html.Div(className='btn-wrapper',style=style_wrapper,
+		children=[
+			html.Button(
+				button,
+				id=id_text ,
+				n_clicks=0,
+				style=style_button
+			),
+			dbc.Popover(
+				[
+					dbc.PopoverHeader(header,style={'font-size': '15px'}),
+					dbc.PopoverBody(text),
+				],
+				target=id_text ,
+				trigger="focus",
+				style={'z-index':'100000000','font-size': '15px'}
+			),
+		]
+	)
+	return popovers
+
 
 # Generate figures
 def range_slider(df, column):
@@ -10,7 +35,7 @@ def range_slider(df, column):
 				visible=True,
 			)
 		),
-		height=200,
+		height=170,
 		paper_bgcolor='rgba(0,0,0,0)',
     	plot_bgcolor='rgba(0,0,0,0)',
 		margin=dict(l=0, r=0, t=0, b=20),
@@ -26,21 +51,24 @@ def generate_description_card():
 		children=[
 			html.H5("Visualisation tool"),
 			html.H4("Group 44"),
-			html.Div(
-				className="intro",
-				children="This is a work in progress",
-			),
+			# html.Div(
+			# 	className="intro",
+			# 	children="This is a work in progress",
+			# ),
 			# html.H3("Test", id='bounds')
 		],
 	)
 
 def generate_control_card(html_filtering):
+	imp_list = html.Ul(id='my-list', children=[html.Li('Improvement 1'),html.Li('Improvement 1'),html.Li('Improvement 1')])
+
 	return html.Div(
 		id="control-card",
 		children=[
 			html.Hr(),
 			html.H4("Controls"),
 			*html_filtering,
+			create_popover("Improvements", "Filter improvements", imp_list),
 			html.Div(className='btn-wrapper',children=[
 					html.Button('Advanced', id='btn-controls', n_clicks=0),
 				])
