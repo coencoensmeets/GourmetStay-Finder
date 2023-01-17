@@ -17,8 +17,29 @@ class filtering_limits():
 		self.air_columns = ['price', 'service_fee', 'minimum_nights','Construction_year', 'number_of_reviews', 'calculated_host_listings_count']
 		self.res_columns = ['SCORE']
 
+		self.air_cat_columns = ['host_identity_verified','neighbourhood_group','cancellation_policy','instant_bookable','room_type']
+		self.res_cat_columns = ['BORO','CUISINE_DESCRIPTION','ACTION','CRITICAL_FLAG','GRADE']
+
 		self.air_limits = {k: [df_air[k].min(), df_air[k].max()] for k in self.air_columns}
 		self.res_limits = {k: [df_res[k].min(), df_res[k].max()] for k in self.res_columns}
+
+		self.air_cat_options = {k: df_air[k].unique().tolist() for k in self.air_cat_columns}
+		self.res_cat_options = {k: df_res[k].unique().tolist() for k in self.res_cat_columns}
+
+		self.air_limits = dict(self.air_limits,**self.air_cat_options)
+		self.res_limits = dict(self.res_limits,**self.res_cat_options)
+
+	def update_cat_air(self, column, chosen):
+		if column == None and chosen == None:
+			self.air_limits = dict(self.air_limits,**self.air_cat_options)
+		else:
+			self.air_limits[column] = chosen
+
+	def update_cat_res(self, column, chosen):
+		if column == None and chosen == None:
+			self.res_limits = dict(self.res_limits,**self.res_cat_options)
+		else:
+			self.res_limits[column] = chosen
 
 	def update_air(self, column, range):
 		self.air_limits[column] = range
@@ -37,8 +58,13 @@ def filter_data(geojson_feat, filter, bounds=[[-100,-100],[100,100]]): #-73.9778
 			data['geometry']['coordinates'][1]<=bounds[1][0]
 		]
 		for k, v in filter:
-			conditions.extend([data['properties'][k] >= v[0], data['properties'][k]<= v[1]])
-		
+			if len(v) !=0:
+				if not isinstance(v[0],str):
+					conditions.extend([data['properties'][k] >= v[0], data['properties'][k]<= v[1]])
+				else:
+					conditions.extend([data['properties'][k] in v])
+			else:
+				conditions.extend([data['properties'][k] in v])
 		if all(conditions):
 			List.append(data)
 	print("Time it took to filter: {}".format(time.perf_counter()-T_start))
@@ -50,6 +76,7 @@ def N_airbnbs(Map_data, bounds):#Calculate amount of airbnbs in region
 
 def import_restaurants():#importing the restaurant data
 	data = pd.read_csv('RestaurantsNew.csv')
+	data = data[1:5000]
 	data = data[data['lon'].notna()]
 	data = data[data['lat'].notna()]
 	data.dropna()
@@ -64,6 +91,10 @@ def import_restaurants():#importing the restaurant data
 	data['GRADE'] = data['GRADE'].replace({'P': 'U'})
 	data['GRADE'] = data['GRADE'].replace({'Z': 'U'})
 	data['SCORE'] = data['SCORE'].replace({-1: 0})
+	#Under column Action, the values are made clearer
+	data['ACTION'] = data['ACTION'].replace({'Violations were cited in the following area(s).':'Violation'})
+	data['ACTION'] = data['ACTION'].replace({'Establishment Closed by DOHMH.  Violations were cited in the following area(s) and those requiring immediate action were addressed.': 'Establishment Closed by DOHMH'})
+	data['ACTION'] = data['ACTION'].replace({'No violations were recorded at the time of this inspection.': 'No Violations'})
 
 	# Index(['CAMIS', 'DBA', 'BORO', 'BUILDING', 'STREET', 'ZIPCODE', 'PHONE',
 	#        'CUISINE_DESCRIPTION', 'INSPECTION_DATE', 'ACTION', 'VIOLATION_CODE',
@@ -76,17 +107,19 @@ def import_restaurants():#importing the restaurant data
 	return data
 
 def import_airbnb():
-	data = pd.read_csv('airbnb_open_data.csv') #importing the airbnb Data
+	data = pd.read_csv('airbnb_open_data.csv',dtype={'instant_bookable':str}) #importing the airbnb Data
 	data = data[1:5000] #Line only for testing to save time
 	data = data[data['long'].notna()]
 	data = data[data['lat'].notna()]
-
 	# Removing true duplicated for geographical position lat & long:
 	columns = ['lat', 'long', 'service fee', 'NAME', 'host name']
 	data = data.drop_duplicates(subset=columns)
 	data = data.replace(np.nan, 30)
 	data.dropna()
 
+	#Replacing instant_bookable values TRUE and FALSE to YES and NO
+	data['instant_bookable'] = data['instant_bookable'].replace({'FALSE':'NO'})
+	data['instant_bookable'] = data['instant_bookable'].replace({'TRUE':'YES'})
 	#Replacing the dollar sign. Changing fee to float and removing dollar sign price
 	data['service fee'][data['service fee'].notnull()] = data['service fee'][data['service fee'].notnull()]\
 		.replace("[$,]", "", regex=True).astype(float)
@@ -211,7 +244,6 @@ class Map():
 
 		else:
 			self.Data['features'] = filter_data(self.geojson_air['features'], self.Filter_class.air_limits.items())
-
 		return [
 				dl.TileLayer(url=self.url, maxZoom=20,minZoom=10, attribution=self.attribution),
 				# dl.GestureHandling(),#Adds ctrl to zoom

@@ -14,6 +14,8 @@ import re
 
 # Remove pandas warnings and surpresses DASH GET and POST outputs
 import warnings
+
+
 warnings.filterwarnings("ignore")
 import logging
 log = logging.getLogger('werkzeug')
@@ -115,7 +117,14 @@ if __name__ == '__main__':
 		Input('res_filter_graph', 'relayoutData'),
 		Input('air_filter_graph', 'relayoutData'),
 		Input('btn-controls', 'n_clicks'),
-		Input('pcp_id', 'restyleData')],
+		Input('pcp_id', 'restyleData'),
+		Input('cat_air_checklist', 'value'),
+		Input('cat_air_drop', 'value'),
+		Input('air_reset_button', 'n_clicks'),
+		Input('cat_res_checklist', 'value'),
+		Input('cat_res_drop', 'value'),
+		Input('res_reset_button', 'n_clicks')
+		],
 		[
 		State(component_id ='map', component_property='children'),
 		State('btn-switch', 'children'),
@@ -126,7 +135,7 @@ if __name__ == '__main__':
 		State('air_filter_drop', 'value'),
 		State('adv_ctrl_div', 'children')]
 		)
-	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data,
+	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data, cat_air_chosen, cat_air,reset_air, cat_res_chosen, cat_res, reset_res,
 					Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air, adv_ctrl_div):
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
@@ -171,6 +180,34 @@ if __name__ == '__main__':
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				adv_ctrl_div = dcc.Graph(figure=Map_data.get_fig_pcp(), id='pcp_id')
+
+		if id_input == 'cat_air_checklist':
+			print("Categorical Airbnb UPDATE")
+			Map_data.Filter_class.update_cat_air(cat_air,cat_air_chosen)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+		#Reset of categorical filter (AirBnb)
+		if id_input == 'air_reset_button':
+			print("Reset Categorical AIRBNB")
+			Map_data.Filter_class.update_cat_air(None,None)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+
+		if id_input == 'cat_res_checklist':
+			print("Categorical RESTAURANT UPDATE")
+			Map_data.Filter_class.update_cat_res(cat_res,cat_res_chosen)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
+		#Reset of categorical filter (AirBnb)
+		if id_input == 'res_reset_button':
+			print("Reset Categorical RESTAURANTS")
+			Map_data.Filter_class.update_cat_res(None,None)
+			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
+			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			Map_data_list = Map_data.update()
 
 		if (id_input=='pcp_id'):
 			if pcp_data!=None:
@@ -298,6 +335,56 @@ if __name__ == '__main__':
 				  Input('res_filter_drop', 'value'),)
 	def change_filter_columns(new_column):
 		return range_slider(Map_data.df_res, new_column)
+
+	# Switch the categorical variable wanted to be filtered (AIRBNB)
+	@app.callback([Output('cat_air_drop','value'),
+				   Output('cat_air_checklist', 'options'),
+				   Output('cat_air_checklist', 'value')],
+				  [Input('cat_air_drop', 'value'),
+				   Input('air_reset_button', 'n_clicks')])
+	def change_checkedlist(new_cat, reset):
+		id_input = ctx.triggered_id
+		if new_cat == None:
+			return new_cat,[], []
+		elif id_input == 'air_reset_button':
+			return [], [], []
+		else:
+			return new_cat, Map_data.Filter_class.air_cat_options[new_cat], Map_data.Filter_class.air_limits[new_cat]
+
+	@app.callback(Output('air_cat_on', 'children'),
+				  [Input('cat_air_drop', 'value'),
+				   Input('air_reset_button', 'n_clicks')])
+	def cat_air_status(on, off):
+		id_input = ctx.triggered_id
+		if id_input == 'cat_air_drop':
+			return 'AIRBNB Categorical Filtering ON'
+		else:
+			return 'AIRBNB Categorical Filtering OFF'
+
+	# Switch the categorical variable wanted to be filtered (RESTAURANTS)
+	@app.callback([Output('cat_res_drop', 'value'),
+				   Output('cat_res_checklist', 'options'),
+				   Output('cat_res_checklist', 'value')],
+				  [Input('cat_res_drop', 'value'),
+				   Input('res_reset_button', 'n_clicks')])
+	def change_checkedlist(new_cat, reset):
+		id_input = ctx.triggered_id
+		if new_cat == None:
+			return new_cat, [], []
+		elif id_input == 'res_reset_button':
+			return [], [], []
+		else:
+			return new_cat, Map_data.Filter_class.res_cat_options[new_cat], Map_data.Filter_class.res_limits[new_cat]
+
+	@app.callback(Output('res_cat_on', 'children'),
+				  [Input('cat_res_checklist', 'value'),
+				   Input('res_reset_button', 'n_clicks')])
+	def cat_air_status(on, off):
+		id_input = ctx.triggered_id
+		if id_input == 'cat_res_checklist':
+			return 'RESTAURANT Categorical Filtering ON'
+		else:
+			return 'RESTAURANT Categorical Filtering OFF'
 
 	# @app.callback(
 	# 	Output("div-loading", "children"),

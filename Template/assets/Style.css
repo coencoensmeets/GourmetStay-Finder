@@ -23,7 +23,7 @@ hr {
 
 #btn-switch{
     position: absolute;
-    z-index: 1;
+    z-index: 5;
     color: white;
     bottom:2%;
 }

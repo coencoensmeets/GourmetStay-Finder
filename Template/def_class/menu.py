@@ -54,6 +54,16 @@ def make_menu_layout(Map_data):
 				dcc.Graph(figure=range_slider(Map_data.df_air, Map_data.Filter_class.air_columns[0]), id='air_filter_graph'),
 				html.Div(children='Restaurant filtering'),
 				dcc.Dropdown(Map_data.Filter_class.res_columns, Map_data.Filter_class.res_columns[0], clearable=False, id='res_filter_drop'),
-				dcc.Graph(figure=range_slider(Map_data.df_res, Map_data.Filter_class.res_columns[0]), id='res_filter_graph')]
-
+				dcc.Graph(figure=range_slider(Map_data.df_res, Map_data.Filter_class.res_columns[0]), id='res_filter_graph'),
+				html.Div(children='CATEGORICAL FILTERING'),
+				html.Div(children='AIRBNBs'),
+				dcc.Dropdown(Map_data.Filter_class.air_cat_columns, id='cat_air_drop'),
+				dcc.Checklist(id='cat_air_checklist'),
+				html.Button(id='air_reset_button', n_clicks=0, children='Reset Filter for AIRBNBs'),
+				html.Div(id='air_cat_on', children='AIRBNB Categorical filtering OFF'),
+				html.Div(children='RESTAURANTS'),
+				dcc.Dropdown(Map_data.Filter_class.res_cat_columns, id='cat_res_drop'),
+				dcc.Checklist(id='cat_res_checklist'),
+				html.Button(id='res_reset_button', n_clicks=0, children='Reset Filter for RESTAURANTS'),
+				html.Div(id='res_cat_on', children='RESTAURANT Categorical filtering OFF')]
 	return [generate_description_card(), generate_control_card(html_filtering)]
