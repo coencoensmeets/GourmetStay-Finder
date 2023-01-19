@@ -23,16 +23,17 @@ log.setLevel(logging.ERROR)
 #Saving data throughout the main interactions of the program. 
 class Save_data():
 	def __init__(self):
-		self.Data = [] #Hover data (mouse of item)
+		self.hoverData = [] #Hover data (mouse of item)
+		self.clickData=[]
 		self.n_clicked = 0 #The amount of times the switch button has been clicked
 		self.n_clicked_ctrl = 0 #The amount of times the advanced control button has been clicked
 		self.feature = {} #Last feature that was hovered over
 
 	def update_hover(self, data): #Updates the hover data
-		self.Data = data
+		self.hoverData = data
 
 	def update_click(self,data): #Updates Clicked data
-		self.Data = data
+		self.clickData = data
 
 	def update_clicked(self, n=1): #Updates the click counter for switching maps
 		self.n_clicked +=n
@@ -139,6 +140,7 @@ if __name__ == '__main__':
 	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data, 
 					cat_air_chosen, cat_air,reset_air, cat_res_chosen, cat_res, reset_res, bounds_density,
 					Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air, adv_ctrl_div):
+
 		cur_show = None
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
@@ -150,12 +152,6 @@ if __name__ == '__main__':
 				if Map_data.Show =='Restaurants':#If the restaurants are shown
 					output_btn = "Show AirBnBs"
 					style = {'border-color':'black','color':'black'}#Change the colour of the button to be visible on the background
-					feature = Data_saved.feature#Get last feature that is clicked upon over (only airbnb)
-					if bool(feature):#Check whether a feature has been clicked upon
-						if not feature['properties']['cluster']:#Check whether it is not a cluster
-							geojsonlast = Map.get_house_data(feature)#Get the html data for the house icon marker
-							Map_data_list.append(geojsonlast)
-
 				else:#Checks whether Airbnbs are shown
 					output_btn = "Show Restaurants"
 					style = {'border-color':'white',
@@ -255,20 +251,23 @@ if __name__ == '__main__':
 
 		if cur_show == None:
 			cur_show = Map_data.Show
-		
+
 		return Map_data_list, output_btn, style, style,cur_show, Mini, N_airbnb, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
 
-	@app.callback([Output("Information", "children"), #Information div
-		Output('tooltip', 'children')], #Tooltop (hovering extension)
-		[Input("markers", "hover_feature"), #Input when a feature is hovered over
-		 Input("markers", "click_feature")]) #Input when a feature is clicked on
+	@app.callback([Output("Information_hover", "children"), #Information div on hover feature
+				   Output('Information_click', 'children'), #Information div on click feature
+				   Output('tooltip', 'children')], #Tooltop (hovering extension)
+				  [Input("markers", "hover_feature"), #Input when a feature is hovered over
+		 		   Input("markers", "click_feature")]) #Input when a feature is clicked on
 	def update_tooltip(hover_feature,click_feature):
 		
 		if hover_feature is None and click_feature is None:
-			return Data_saved.Data, None  # return last information and no tooltip
+			return 'Hover over data to see its information', 'Click on data to save for comparison', None  # return last information and no tooltip
+		elif hover_feature == click_feature:
+			return Data_saved.hoverData, Data_saved.clickData, Data_saved.clickData[0:4]
 		if click_feature is None or (click_feature != hover_feature and hover_feature is not None):
 			if hover_feature['properties']['cluster'] == True:  # Check whether the feature is a cluster
-				return Data_saved.Data, [
+				return 'Hover over data to see its information', 'Click on data to save for comparison', [
 					html.P('#N={}'.format(hover_feature['properties']['point_count']))]  # Returns cluster information
 			elif Map_data.Show == 'Restaurants':  # Restaurant map is shown
 				# Creates the html for the information
@@ -286,7 +285,10 @@ if __name__ == '__main__':
 						])]
 				# print(feature)
 				Data_saved.update_hover(Output)  # update last hover feature
-				return Data_saved.Data, Data_saved.Data[0:4]
+				if click_feature is None:
+					return Data_saved.hoverData, 'Click on data to save for comparison', Data_saved.hoverData[0:4]
+				else:
+					return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
 			else:  # Airbnb map is shown
 				# Creates the html for the information
 				Output = [
@@ -296,10 +298,13 @@ if __name__ == '__main__':
 					html.P("Rating: {}".format(hover_feature['properties']['review_rate_number']))
 				]
 				Data_saved.update_hover(Output)  # Updates last hover feature
-				return Data_saved.Data, Data_saved.Data[0:4]
+				if click_feature is None:
+					return Data_saved.hoverData, 'Click on data to save for comparison', Data_saved.hoverData[0:4]
+				else:
+					return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
 		else:
 			if click_feature['properties']['cluster'] == True:  # Check whether the feature is a cluster
-				return Data_saved.Data, [
+				return Data_saved.hoverData, Data_saved.clickData, [
 					html.P('#N={}'.format(click_feature['properties']['point_count']))]  # Returns cluster information
 			elif Map_data.Show == 'Restaurants':  # Restaurant map is shown
 				# Creates the html for the information
@@ -316,8 +321,8 @@ if __name__ == '__main__':
 							html.Button("Google")
 						])]
 				# print(feature)
-				Data_saved.update_click(Output)  # update last hover feature
-				return Data_saved.Data, Data_saved.Data[0:4]
+				Data_saved.update_click(Output)  # update last click feature
+				return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
 			else:  # Airbnb map is shown
 				# Creates the html for the information
 				Output = [
@@ -326,8 +331,8 @@ if __name__ == '__main__':
 					html.P("Price: {}".format(click_feature['properties']['price'])),
 					html.P("Rating: {}".format(click_feature['properties']['review_rate_number']))
 				]
-				Data_saved.update_click(Output)  # Updates last hover feature
-				return Data_saved.Data, Data_saved.Data[0:4]
+				Data_saved.update_click(Output)  # Updates last click feature
+				return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
 
 	#Update the feature clicked in data stored
 	@app.callback(Output('hidden-div', 'children'),#Output hidden div as no information has to be passed with this input

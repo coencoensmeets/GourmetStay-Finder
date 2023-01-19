@@ -19,7 +19,9 @@ def generate_output():
         children=[
             html.Hr(),
             #Restaurant Data
-            html.Div(id='Information'),
+            html.Div(id='Information_hover'),
+            html.Hr(),
+            html.Div(id='Information_click'),
             html.Hr(),
             html.Div(
             children=[

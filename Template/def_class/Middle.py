@@ -190,7 +190,7 @@ class Map():
 		patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
 		self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 
-		imp_list = html.Ul(id='list', children=[html.Li('Make the cluster colours equiluminance'),html.Li('Be able to select more than one Airbnb to maintain within the restaurant graph.'),html.Li('Improvement 1')])
+		imp_list = html.Ul(id='list', children=[html.Li('Make the cluster colours equiluminance'),html.Li('Be able to select Airbnbs to maintain within the restaurant graph.'),html.Li('Visually separate the selected datapoints on the map')])
 		#Creation of the html div for the entire middle part.
 		self.html_div =  [
 			html.Div(
