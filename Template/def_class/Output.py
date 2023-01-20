@@ -25,7 +25,7 @@ def generate_output():
             html.Hr(),
             html.Div(
             children=[
-            	html.Div(id='Nairbnb',children='Airbnbs in region: ')
+            	html.Div(id='Nairbnb',children='Airbnbs in region/Average price/Average Fee: ')
             ]
             ),
 			dcc.Loading(

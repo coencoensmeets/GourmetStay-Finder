@@ -158,12 +158,12 @@ if __name__ == '__main__':
 						'color':'white'}#change colour of button to be visible on background
 				Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 				Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
-				N_airbnb = "Airbnbs in visible region: {}".format(Count)
+				N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count[0])
 				print(N_airbnb)
 		if (id_input=='map'):
 			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			print(N_airbnb)
 
 		#Change of filter (Restaurants)
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 			print("Restaurant filter UPDATE")
 			Map_data.Filter_class.update_res(res_filt_res, layout_graph_res['xaxis.range']) #Update the filtering class
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 
 		#Change of filter (Airbnb)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
 			print("Airbnb filter UPDATE")
 			Map_data.Filter_class.update_air(res_filt_air, layout_graph_air['xaxis.range'])
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				print(bounds_density)
@@ -189,7 +189,7 @@ if __name__ == '__main__':
 			print("Categorical Airbnb UPDATE")
 			Map_data.Filter_class.update_cat_air(cat_air,cat_air_chosen)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				adv_ctrl_div = Map_data.get_adv_graphs()
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 			print("Reset Categorical AIRBNB")
 			Map_data.Filter_class.update_cat_air(None,None)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				adv_ctrl_div = Map_data.get_adv_graphs()
@@ -207,14 +207,14 @@ if __name__ == '__main__':
 			print("Categorical RESTAURANT UPDATE")
 			Map_data.Filter_class.update_cat_res(cat_res,cat_res_chosen)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 		#Reset of categorical filter (AirBnb)
 		if id_input == 'res_reset_button':
 			print("Reset Categorical RESTAURANTS")
 			Map_data.Filter_class.update_cat_res(None,None)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs in visible region: {}".format(Count)
+			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 			Map_data_list = Map_data.update()
 
 		if (id_input=='pcp_id'):
@@ -227,7 +227,7 @@ if __name__ == '__main__':
 					print("Update ({}): {}".format(Column, Range))
 					Map_data.Filter_class.update_air(Column, Range)
 					Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-					N_airbnb = "Airbnbs in visible region: {}".format(Count)
+					N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
 
 		#Switch to advanced and back.
 		if (id_input == 'btn-controls'):
