@@ -106,6 +106,8 @@ if __name__ == '__main__':
 		Output('data_showing', 'children'),#"Currently showing ... map" text
 		Output('mini-map', 'children'),#Minimap component
 		Output('Nairbnb', 'children'), #Amount of airbnbs text
+		Output('meanprice','children'),
+		Output('meanservice','children'),
 		Output('loading-output', 'value'),
 		Output('map_div', 'style'),  #Style of the map div
 		Output('adv_ctrl_div', 'style'),
@@ -140,7 +142,8 @@ if __name__ == '__main__':
 	def update_map(N, bounds,layout_graph_res,layout_graph_air, N_adv, pcp_data, 
 					cat_air_chosen, cat_air,reset_air, cat_res_chosen, cat_res, reset_res, bounds_density,
 					Map_data_list, output_btn, style, Mini, N_airbnb, res_filt_res, res_filt_air, adv_ctrl_div):
-
+		mean_price=""
+		mean_service=""
 		cur_show = None
 		id_input = ctx.triggered_id
 		if (id_input=='btn-switch'):
@@ -158,20 +161,26 @@ if __name__ == '__main__':
 						'color':'white'}#change colour of button to be visible on background
 				Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 				Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
-				N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count[0])
+				N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+				mean_price = "Average Price of an AirBnB: ${}".format(Count[1])
+				mean_service = "Average Service Fee for an AirBnb: ${}".format(Count[2])
 				print(N_airbnb)
 		if (id_input=='map'):
 			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
-			print(N_airbnb)
+			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
+
 
 		#Change of filter (Restaurants)
 		if (id_input == 'res_filter_graph') and ('xaxis.range' in layout_graph_res.keys()):
 			print("Restaurant filter UPDATE")
 			Map_data.Filter_class.update_res(res_filt_res, layout_graph_res['xaxis.range']) #Update the filtering class
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
 
 		#Change of filter (Airbnb)
@@ -179,7 +188,9 @@ if __name__ == '__main__':
 			print("Airbnb filter UPDATE")
 			Map_data.Filter_class.update_air(res_filt_air, layout_graph_air['xaxis.range'])
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+			N_airbnb = "Number of AirBnbs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				print(bounds_density)
@@ -189,7 +200,9 @@ if __name__ == '__main__':
 			print("Categorical Airbnb UPDATE")
 			Map_data.Filter_class.update_cat_air(cat_air,cat_air_chosen)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				adv_ctrl_div = Map_data.get_adv_graphs()
@@ -198,7 +211,9 @@ if __name__ == '__main__':
 			print("Reset Categorical AIRBNB")
 			Map_data.Filter_class.update_cat_air(None,None)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
 			if Data_saved.n_clicked_ctrl%2 == 1:
 				adv_ctrl_div = Map_data.get_adv_graphs()
@@ -207,14 +222,18 @@ if __name__ == '__main__':
 			print("Categorical RESTAURANT UPDATE")
 			Map_data.Filter_class.update_cat_res(cat_res,cat_res_chosen)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
 		#Reset of categorical filter (AirBnb)
 		if id_input == 'res_reset_button':
 			print("Reset Categorical RESTAURANTS")
 			Map_data.Filter_class.update_cat_res(None,None)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			mean_price = "Average Price: ${}".format(Count[1])
+			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
 
 		if (id_input=='pcp_id'):
@@ -227,7 +246,9 @@ if __name__ == '__main__':
 					print("Update ({}): {}".format(Column, Range))
 					Map_data.Filter_class.update_air(Column, Range)
 					Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-					N_airbnb = "Airbnbs, mean price and service fee in visible region: {}".format(Count)
+					N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+					mean_price = "Average Price: ${}".format(Count[1])
+					mean_service = "Average Service Fee: ${}".format(Count[2])
 
 		#Switch to advanced and back.
 		if (id_input == 'btn-controls'):
@@ -252,7 +273,7 @@ if __name__ == '__main__':
 		if cur_show == None:
 			cur_show = Map_data.Show
 
-		return Map_data_list, output_btn, style, style,cur_show, Mini, N_airbnb, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
+		return Map_data_list, output_btn, style, style,cur_show, Mini, N_airbnb,mean_price,mean_service, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
 
 	@app.callback([Output("Information_hover", "children"), #Information div on hover feature
 				   Output('Information_click', 'children'), #Information div on click feature
@@ -275,7 +296,11 @@ if __name__ == '__main__':
 					html.B("NOT SELECTED"),
 					html.P("Name: {}".format(str(hover_feature['properties']['DBA']).lower())),
 					html.P("Score: {}".format(hover_feature['properties']['SCORE'])),
-					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE_DESCRIPTION'])),
+					html.P("Cuisine: {}".format(hover_feature['properties']['CUISINE'])),
+					html.P("Borough: {}".format(hover_feature['properties']['BOROUGH'])),
+					html.P("Violations: {}".format(hover_feature['properties']['VIOLATIONS'])),
+					html.P("Violation Criticality: {}".format(hover_feature['properties']['VIOLATION CRITICALITY'])),
+					html.P("Grade: {}".format(hover_feature['properties']['GRADE'])),
 					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
 						hover_feature['properties']['DBA'],
 						hover_feature['properties']['BUILDING'],
@@ -294,8 +319,18 @@ if __name__ == '__main__':
 				Output = [
 					html.B("NOT SELECTED"),
 					html.P("Name: {}".format(str(hover_feature['properties']['NAME']).lower())),
-					html.P("Price: {}".format(hover_feature['properties']['price'])),
-					html.P("Rating: {}".format(hover_feature['properties']['review_rate_number']))
+					html.P("Price: ${}".format(hover_feature['properties']['PRICE'])),
+					html.P("Rating: {}".format(hover_feature['properties']['review_rate_number'])),
+					html.P("Service Fee: ${}".format(hover_feature['properties']['SERVICE FEE'])),
+					html.P("Minimum Nights: {}".format(hover_feature['properties']['MINIMUM NIGHTS'])),
+					html.P("Construction Year: {}".format(hover_feature['properties']['CONSTRUCTION YEAR'])),
+					html.P("Borough: {}".format(hover_feature['properties']['BOROUGH'])),
+					html.P("Number of Reviews: {}".format(hover_feature['properties']['NUMBER OF REVIEWS'])),
+					html.P("Number of Host Listings: {}".format(hover_feature['properties']['NUMBER OF HOST LISTINGS'])),
+					html.P("Host Identity: {}".format(hover_feature['properties']['HOST IDENTITY'])),
+					html.P("Cancellation Policy: {}".format(hover_feature['properties']['CANCELLATION POLICY'])),
+					html.P("Instantly Bookable: {}".format(hover_feature['properties']['INSTANTLY BOOKABLE'])),
+					html.P("Room Type: {}".format(hover_feature['properties']['ROOM TYPE']))
 				]
 				Data_saved.update_hover(Output)  # Updates last hover feature
 				if click_feature is None:
@@ -312,7 +347,11 @@ if __name__ == '__main__':
 					html.B("SELECTED"),
 					html.P("Name: {}".format(str(click_feature['properties']['DBA']).lower())),
 					html.P("Score: {}".format(click_feature['properties']['SCORE'])),
-					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE_DESCRIPTION'])),
+					html.P("Cuisine: {}".format(click_feature['properties']['CUISINE'])),
+					html.P("Borough: {}".format(click_feature['properties']['BOROUGH'])),
+					html.P("Violations: {}".format(click_feature['properties']['VIOLATIONS'])),
+					html.P("Violation Criticality: {}".format(click_feature['properties']['VIOLATION CRITICALITY'])),
+					html.P("Grade: {}".format(click_feature['properties']['GRADE'])),
 					html.A(href="https://www.google.com/search?q={} {} {} NYC".format(
 						click_feature['properties']['DBA'],
 						click_feature['properties']['BUILDING'],
@@ -328,8 +367,18 @@ if __name__ == '__main__':
 				Output = [
 					html.B("SELECTED"),
 					html.P("Name: {}".format(str(click_feature['properties']['NAME']).lower())),
-					html.P("Price: {}".format(click_feature['properties']['price'])),
-					html.P("Rating: {}".format(click_feature['properties']['review_rate_number']))
+					html.P("Price: ${}".format(click_feature['properties']['PRICE'])),
+					html.P("Rating: {}".format(click_feature['properties']['review_rate_number'])),
+					html.P("Service Fee: ${}".format(click_feature['properties']['SERVICE FEE'])),
+					html.P("Minimum Nights: {}".format(click_feature['properties']['MINIMUM NIGHTS'])),
+					html.P("Construction Year: {}".format(click_feature['properties']['CONSTRUCTION YEAR'])),
+					html.P("Borough: {}".format(click_feature['properties']['BOROUGH'])),
+					html.P("Number of Reviews: {}".format(click_feature['properties']['NUMBER OF REVIEWS'])),
+					html.P("Number of Host Listings: {}".format(click_feature['properties']['NUMBER OF HOST LISTINGS'])),
+					html.P("Host Identity: {}".format(click_feature['properties']['HOST IDENTITY'])),
+					html.P("Cancellation Policy: {}".format(click_feature['properties']['CANCELLATION POLICY'])),
+					html.P("Instantly Bookable: {}".format(click_feature['properties']['INSTANTLY BOOKABLE'])),
+					html.P("Room Type: {}".format(click_feature['properties']['ROOM TYPE']))
 				]
 				Data_saved.update_click(Output)  # Updates last click feature
 				return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
@@ -379,9 +428,9 @@ if __name__ == '__main__':
 	def cat_air_status(on, off):
 		id_input = ctx.triggered_id
 		if id_input == 'cat_air_drop':
-			return 'AIRBNB Categorical Filtering ON'
+			return 'CATEGORICAL FILTERING: ON'
 		else:
-			return 'AIRBNB Categorical Filtering OFF'
+			return 'CATEGORICAL FILTERING: OFF'
 
 	# Switch the categorical variable wanted to be filtered (RESTAURANTS)
 	@app.callback([Output('cat_res_drop', 'value'),
@@ -404,8 +453,8 @@ if __name__ == '__main__':
 	def cat_air_status(on, off):
 		id_input = ctx.triggered_id
 		if id_input == 'cat_res_checklist':
-			return 'RESTAURANT Categorical Filtering ON'
+			return 'CATEGORICAL FILTERING: ON'
 		else:
-			return 'RESTAURANT Categorical Filtering OFF'
+			return 'CATEGORICAL FILTERING: OFF'
 
 	app.run_server(debug=False)#Run the website

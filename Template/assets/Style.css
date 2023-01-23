@@ -70,27 +70,34 @@ hr {
 
 #left-column {
     padding: 0px 0rem;
-	width:16vw;
+	width:16.5vw;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 	max-height:100vh;
 	overflow:auto;
-	margin-left:20px;
+	margin-left:0.5vw;
+	margin-right:1vw;
 }
 #middle-column {
     display:block;
     position: relative;
-	width:67.5vw;
+	width:67vw;
     padding: 0px 0rem;
     min-height: 100vh;
     background-color: #e8e8e8;
 }
 
 #right-column {
+    padding: 0px 0rem;
 	width:14vw;
-    padding: 0rem 0rem;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
+    max-height:100vh;
+    overflow:auto;
+    margin-left:0.5vw;
+    margin-right:0.5vw;
 }
 
 

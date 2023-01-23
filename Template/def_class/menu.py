@@ -49,8 +49,8 @@ def generate_description_card():
 	return html.Div(
 		id="description-card",
 		children=[
-			html.H5("Visualisation tool"),
-			html.H4("Group 44"),
+			html.H5("NEW YORK MAPS (add name)", style ={'font-weight':'bold'}),
+			html.H4("Group 44", style={'font-weight':'bold','margin-bottom':'0rem'}),
 			# html.Div(
 			# 	className="intro",
 			# 	children="This is a work in progress",
@@ -65,10 +65,11 @@ def generate_control_card(html_filtering):
 	return html.Div(
 		id="control-card",
 		children=[
-			html.Hr(),
+			html.Hr(style = {'width':'100%','height':'2px', 'border-width':'0', 'color':'gray', 'background-color':'gray'}),
 			html.H4("Controls"),
 			*html_filtering,
 			create_popover("Improvements", "Filter improvements", imp_list),
+			html.Hr(style = {'width':'100%','height':'2px', 'border-width':'0', 'color':'gray', 'background-color':'gray'}),
 			html.Div(className='btn-wrapper',children=[
 					html.Button('Advanced', id='btn-controls', n_clicks=0),
 				])
@@ -77,21 +78,27 @@ def generate_control_card(html_filtering):
 
 
 def make_menu_layout(Map_data):
-	html_filtering = [html.Div(children='Airbnb filtering'),
+	html_filtering = [
+				html.H5("AIRBNBS:"),
+				html.Div(children='NUMERICAL FILTERS', style = {'font-weight':'bold', 'font-style':'italic'}),
 				dcc.Dropdown(Map_data.Filter_class.air_columns, Map_data.Filter_class.air_columns[0], clearable=False, id='air_filter_drop'),
 				dcc.Graph(figure=range_slider(Map_data.df_air, Map_data.Filter_class.air_columns[0]), id='air_filter_graph'),
-				html.Div(children='Restaurant filtering'),
-				dcc.Dropdown(Map_data.Filter_class.res_columns, Map_data.Filter_class.res_columns[0], clearable=False, id='res_filter_drop'),
-				dcc.Graph(figure=range_slider(Map_data.df_res, Map_data.Filter_class.res_columns[0]), id='res_filter_graph'),
-				html.Div(children='CATEGORICAL FILTERING'),
-				html.Div(children='AIRBNBs'),
+				html.Hr(style={'width': '0%'}),
+				html.Div(children='CATEGORICAL FILTERS', style = {'font-weight':'bold', 'font-style':'italic'}),
 				dcc.Dropdown(Map_data.Filter_class.air_cat_columns, id='cat_air_drop'),
 				dcc.Checklist(id='cat_air_checklist'),
-				html.Button(id='air_reset_button', n_clicks=0, children='Reset Filter for AIRBNBs'),
-				html.Div(id='air_cat_on', children='AIRBNB Categorical filtering OFF'),
-				html.Div(children='RESTAURANTS'),
+				html.Div(id='air_cat_on', children='CATEGORICAL FILTERING: OFF', style={'font-style': 'italic'}),
+				dbc.Button(id='air_reset_button', n_clicks=0, children='Reset Categorical', color = 'secondary', size = 'lg'),
+				html.Hr(),
+				html.H5('RESTAURANTS:'),
+				html.Div(children='NUMERICAL FILTERS', style = {'font-weight':'bold', 'font-style':'italic'}),
+				dcc.Dropdown(Map_data.Filter_class.res_columns, Map_data.Filter_class.res_columns[0], clearable=False, id='res_filter_drop'),
+				dcc.Graph(figure=range_slider(Map_data.df_res, Map_data.Filter_class.res_columns[0]), id='res_filter_graph'),
+				html.Hr(style={'width': '0%'}),
+				html.Div(children='CATEGORICAL FILTERS', style = {'font-weight':'bold', 'font-style':'italic'}),
 				dcc.Dropdown(Map_data.Filter_class.res_cat_columns, id='cat_res_drop'),
 				dcc.Checklist(id='cat_res_checklist'),
-				html.Button(id='res_reset_button', n_clicks=0, children='Reset Filter for RESTAURANTS'),
-				html.Div(id='res_cat_on', children='RESTAURANT Categorical filtering OFF')]
+				html.Div(id='res_cat_on', children='CATEGORICAL FILTERING: OFF', style={'font-style': 'italic'}),
+				dbc.Button(id='res_reset_button', n_clicks=0, children='Reset Categorical', color = 'secondary', size = 'lg'),
+				html.Hr()]
 	return [generate_description_card(), generate_control_card(html_filtering)]

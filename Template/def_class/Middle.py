@@ -16,13 +16,13 @@ import copy
 
 class filtering_limits():
     def __init__(self, df_air, df_res):
-        self.air_columns = ['price', 'service_fee', 'minimum_nights', 'Construction_year', 'number_of_reviews',
-                            'calculated_host_listings_count']
+        self.air_columns = ['PRICE', 'SERVICE FEE', 'MINIMUM NIGHTS', 'CONSTRUCTION YEAR', 'NUMBER OF REVIEWS',
+                            'NUMBER OF HOST LISTINGS']
         self.res_columns = ['SCORE']
 
-        self.air_cat_columns = ['host_identity_verified', 'neighbourhood_group', 'cancellation_policy',
-                                'instant_bookable', 'room_type']
-        self.res_cat_columns = ['BORO', 'CUISINE_DESCRIPTION', 'ACTION', 'CRITICAL_FLAG', 'GRADE']
+        self.air_cat_columns = ['HOST IDENTITY', 'BOROUGH', 'CANCELLATION POLICY',
+                                'INSTANTLY BOOKABLE', 'ROOM TYPE']
+        self.res_cat_columns = ['BOROUGH', 'CUISINE', 'VIOLATIONS', 'VIOLATION CRITICALITY', 'GRADE']
 
         self.air_limits = {k: [df_air[k].min(), df_air[k].max()] for k in self.air_columns}
         self.res_limits = {k: [df_res[k].min(), df_res[k].max()] for k in self.res_columns}
@@ -84,13 +84,16 @@ def N_airbnbs(Map_data, bounds):  # Calculate amount of airbnbs in region
     s_servfee = []
     for i in range(0,len(Price_Air)):
         Int_dict = Price_Air[i].get('properties')
-        Price = Int_dict.get('price')
-        Serv_fee = Int_dict.get('service_fee')
+        Price = Int_dict.get('PRICE')
+        Serv_fee = Int_dict.get('SERVICE FEE')
         s_price.append(Price)
         s_servfee.append(Serv_fee)
-
-    Mean_price = round(sum(s_price)/i, 1)
-    Mean_servfee = round(sum(s_servfee)/i, 1)
+    if len(Price_Air)!=0:
+        Mean_price = round(sum(s_price)/len(Price_Air), 1)
+        Mean_servfee = round(sum(s_servfee)/len(Price_Air), 1)
+    else:
+        Mean_price=0
+        Mean_servfee=0
 
     return N_air, Mean_price, Mean_servfee
 
@@ -113,14 +116,14 @@ def import_restaurants():  # importing the restaurant data
     data['GRADE'] = data['GRADE'].replace({'Z': 'U'})
     data['SCORE'] = data['SCORE'].replace({-1: 0})
     # Under column Action, the values are made clearer
-    data['ACTION'] = data['ACTION'].replace({'Violations were cited in the following area(s).': 'Violation'})
+    data['ACTION'] = data['ACTION'].replace({'Violations were cited in the following area(s).': 'Violations Cited'})
     data['ACTION'] = data['ACTION'].replace({
                                                 'Establishment Closed by DOHMH.  Violations were cited in the following area(s) and those requiring immediate action were addressed.': 'Establishment Closed by DOHMH'})
     data['ACTION'] = data['ACTION'].replace(
         {'No violations were recorded at the time of this inspection.': 'No Violations'})
     data = data[data['ACTION'] != 'null']
     data = data[data['GRADE'] != 'U']
-
+    data = data.rename({'BORO':'BOROUGH','CUISINE_DESCRIPTION':'CUISINE','ACTION':'VIOLATIONS','CRITICAL_FLAG':'VIOLATION CRITICALITY'},axis=1) #Cleaning up column names
     return data
 
 
@@ -164,6 +167,8 @@ def import_airbnb():
     data['legality'] = data['legality'].replace({False: 'No Breach'})
 
     data.columns = data.columns.str.replace(' ', '_')
+    data = data.rename({'price':'PRICE','service_fee':'SERVICE FEE','minimum_nights':'MINIMUM NIGHTS','Construction_year':'CONSTRUCTION YEAR','number_of_reviews':'NUMBER OF REVIEWS','calculated_host_listings_count':'NUMBER OF HOST LISTINGS',
+                        'host_identity_verified':'HOST IDENTITY','neighbourhood_group':'BOROUGH','cancellation_policy':'CANCELLATION POLICY','instant_bookable':'INSTANTLY BOOKABLE','room_type':'ROOM TYPE'},axis=1)
     return data
 
 
@@ -329,40 +334,40 @@ class Map():
 
         fig = go.Figure(data=
         go.Parcoords(
-            line=dict(color=df_interest['price'],
+            line=dict(color=df_interest['PRICE'],
                       colorscale=px.colors.sequential.algae, # Using green shades as it is best for humans
                       showscale=True,
                       cmin=1200,
                       cmax=30),
             dimensions=list([
-                dict(range=[min(df_interest['price']), max(df_interest['price'])],
+                dict(range=[min(df_interest['PRICE']), max(df_interest['PRICE'])],
                      tickvals=[30, 300, 600, 900, 1200],
-                     constraintrange=[self.Filter_class.air_limits['price'][0],
-                                      self.Filter_class.air_limits['price'][1]],
-                     label='Price', values=df_interest['price']),
+                     constraintrange=[self.Filter_class.air_limits['PRICE'][0],
+                                      self.Filter_class.air_limits['PRICE'][1]],
+                     label='Price', values=df_interest['PRICE']),
 
-                dict(range=[min(df_interest['service_fee']), max(df_interest['service_fee'])],
+                dict(range=[min(df_interest['SERVICE FEE']), max(df_interest['SERVICE FEE'])],
                      tickvals=[10, 60, 120, 180, 240],
-                     constraintrange=[self.Filter_class.air_limits['service_fee'][0],
-                                      self.Filter_class.air_limits['service_fee'][1]],
-                     label='Service Fee', values=df_interest['service_fee']),
+                     constraintrange=[self.Filter_class.air_limits['SERVICE FEE'][0],
+                                      self.Filter_class.air_limits['SERVICE FEE'][1]],
+                     label='Service Fee', values=df_interest['SERVICE FEE']),
 
-                dict(constraintrange=[self.Filter_class.air_limits['minimum_nights'][0],
-                                      self.Filter_class.air_limits['minimum_nights'][1]],
-                     range=[0, max(df_interest['minimum_nights'])],
+                dict(constraintrange=[self.Filter_class.air_limits['MINIMUM NIGHTS'][0],
+                                      self.Filter_class.air_limits['MINIMUM NIGHTS'][1]],
+                     range=[0, max(df_interest['MINIMUM NIGHTS'])],
                      tickvals=[0, 45, 90],
-                     label='Minimum Nights', values=df_interest['minimum_nights']),
+                     label='Minimum Nights', values=df_interest['MINIMUM NIGHTS']),
 
-                dict(constraintrange=[self.Filter_class.air_limits['Construction_year'][0],
-                                      self.Filter_class.air_limits['Construction_year'][1]],
-                     range=[2002, max(df_interest['Construction_year'])],
+                dict(constraintrange=[self.Filter_class.air_limits['CONSTRUCTION YEAR'][0],
+                                      self.Filter_class.air_limits['CONSTRUCTION YEAR'][1]],
+                     range=[2002, max(df_interest['CONSTRUCTION YEAR'])],
                      tickvals=[2002, 2008, 2012, 2016, 2022],
-                     label='Construction Year', values=df_interest['Construction_year']),
+                     label='Construction Year', values=df_interest['CONSTRUCTION YEAR']),
 
-                dict(constraintrange=[self.Filter_class.air_limits['number_of_reviews'][0],
-                                      self.Filter_class.air_limits['number_of_reviews'][1]],
-                     range=[0, max(df_interest['number_of_reviews'])],
-                     label='Number of Reviews', values=df_interest['number_of_reviews'])
+                dict(constraintrange=[self.Filter_class.air_limits['NUMBER OF REVIEWS'][0],
+                                      self.Filter_class.air_limits['NUMBER OF REVIEWS'][1]],
+                     range=[0, max(df_interest['NUMBER OF REVIEWS'])],
+                     label='Number of Reviews', values=df_interest['NUMBER OF REVIEWS'])
             ])
         )
         )
@@ -384,7 +389,7 @@ class Map():
         fig = px.density_mapbox(data, lat='lat', lon='long', opacity=0.6, radius=15,
                                 center=dict(lat=40.7, lon=-74), zoom=8,
                                 mapbox_style="open-street-map",
-                                custom_data = ['properties.price', 'properties.room_type', 'properties.legality'])
+                                custom_data = ['properties.PRICE', 'properties.ROOM TYPE', 'properties.legality'])
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, uirevision='0')
         fig.update_traces(hovertemplate='Latitude: %{lat} <br>Longitude: %{lon} <br>Price: %{customdata[0]} <br>Room Type: %{customdata[1]} <br>Legality Warning: %{customdata[2]}')
         return fig
