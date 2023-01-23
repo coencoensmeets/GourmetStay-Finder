@@ -165,10 +165,17 @@ def import_airbnb():
     data['legality'] = query
     data['legality'] = data['legality'].replace({True: 'Possible Breach'})
     data['legality'] = data['legality'].replace({False: 'No Breach'})
+    data['neighbourhood group'] = data['neighbourhood group'].replace({'brookln': 'Brooklyn'})
+    # data = data[data['neighbourhood group'] != 'brookln']
+
+
+
 
     data.columns = data.columns.str.replace(' ', '_')
     data = data.rename({'price':'PRICE','service_fee':'SERVICE FEE','minimum_nights':'MINIMUM NIGHTS','Construction_year':'CONSTRUCTION YEAR','number_of_reviews':'NUMBER OF REVIEWS','calculated_host_listings_count':'NUMBER OF HOST LISTINGS',
                         'host_identity_verified':'HOST IDENTITY','neighbourhood_group':'BOROUGH','cancellation_policy':'CANCELLATION POLICY','instant_bookable':'INSTANTLY BOOKABLE','room_type':'ROOM TYPE'},axis=1)
+
+    print(data['BOROUGH'].unique())
     return data
 
 
