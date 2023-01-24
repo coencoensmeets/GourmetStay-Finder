@@ -26,7 +26,7 @@ def generate_output():
             html.H5("AIRBNBs in the visible region:"),
             html.Div(
             children=[
-            	html.Div(id='Nairbnb',children=' Number of AirBnBs:'),
+            	html.Div(id='Nairbnb',children='Number of AIRBNBs:'),
                 html.Hr(style={'width': '0%'}),
                 html.Div(id='meanprice', children='Average Price:'),
                 html.Hr(style={'width': '0%'}),

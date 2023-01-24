@@ -112,7 +112,8 @@ if __name__ == '__main__':
 		Output('map_div', 'style'),  #Style of the map div
 		Output('adv_ctrl_div', 'style'),
 		Output('adv_ctrl_div', 'children'),
-		Output("div-loading", "children")
+		Output("div-loading", "children"),
+		Output('btn-controls','children')
 		],
 		[
 		Input('btn-switch', 'n_clicks'),#The switch from map button input (amount of clicks)
@@ -161,14 +162,14 @@ if __name__ == '__main__':
 						'color':'white'}#change colour of button to be visible on background
 				Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
 				Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
-				N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+				N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 				mean_price = "Average Price of an AirBnB: ${}".format(Count[1])
 				mean_service = "Average Service Fee for an AirBnb: ${}".format(Count[2])
 				print(N_airbnb)
 		if (id_input=='map'):
 			Mini = Map_data.update_bounds_mini(bounds) #With the bounds update the minimap (Output is html data for the minimap)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 
@@ -178,7 +179,7 @@ if __name__ == '__main__':
 			print("Restaurant filter UPDATE")
 			Map_data.Filter_class.update_res(res_filt_res, layout_graph_res['xaxis.range']) #Update the filtering class
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
@@ -188,7 +189,7 @@ if __name__ == '__main__':
 			print("Airbnb filter UPDATE")
 			Map_data.Filter_class.update_air(res_filt_air, layout_graph_air['xaxis.range'])
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnbs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
@@ -200,7 +201,7 @@ if __name__ == '__main__':
 			print("Categorical Airbnb UPDATE")
 			Map_data.Filter_class.update_cat_air(cat_air,cat_air_chosen)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
@@ -211,7 +212,7 @@ if __name__ == '__main__':
 			print("Reset Categorical AIRBNB")
 			Map_data.Filter_class.update_cat_air(None,None)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
@@ -222,7 +223,7 @@ if __name__ == '__main__':
 			print("Categorical RESTAURANT UPDATE")
 			Map_data.Filter_class.update_cat_res(cat_res,cat_res_chosen)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
@@ -231,7 +232,7 @@ if __name__ == '__main__':
 			print("Reset Categorical RESTAURANTS")
 			Map_data.Filter_class.update_cat_res(None,None)
 			Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-			N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+			N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
@@ -246,7 +247,7 @@ if __name__ == '__main__':
 					print("Update ({}): {}".format(Column, Range))
 					Map_data.Filter_class.update_air(Column, Range)
 					Count = Map.N_airbnbs(Map_data,bounds) #Calculates amount of airbnbs in shown region
-					N_airbnb = "Number of AirBnBs: {}".format(Count[0])
+					N_airbnb = "Number of AIRBNBs: {}".format(Count[0])
 					mean_price = "Average Price: ${}".format(Count[1])
 					mean_service = "Average Service Fee: ${}".format(Count[2])
 
@@ -273,7 +274,12 @@ if __name__ == '__main__':
 		if cur_show == None:
 			cur_show = Map_data.Show
 
-		return Map_data_list, output_btn, style, style,cur_show, Mini, N_airbnb,mean_price,mean_service, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None
+		if Data_saved.n_clicked_ctrl % 2 == 0:
+			adv_button_child = 'Switch to Advanced Section'
+		else:
+			adv_button_child = 'Switch to Normal'
+
+		return Map_data_list, output_btn, style, style,cur_show, Mini, N_airbnb,mean_price,mean_service, "", Output_style_adv[0], Output_style_adv[1], adv_ctrl_div, None, adv_button_child
 
 	@app.callback([Output("Information_hover", "children"), #Information div on hover feature
 				   Output('Information_click', 'children'), #Information div on click feature

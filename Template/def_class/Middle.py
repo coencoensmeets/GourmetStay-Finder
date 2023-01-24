@@ -153,12 +153,13 @@ def import_airbnb():
     data = data.drop_duplicates(subset='id')
 
     # Removal of outliers (Based on sources)
-    data = data[data['minimum nights'] < 90]
+    data = data[(data['minimum nights'] < 90) & (data['minimum nights'] >= 0)]
     data = data[data['Construction year'] > 2002]
     data = data[data['host_identity_verified'] != 30]
     data = data[data['neighbourhood group'] != 30]
     data = data[data['cancellation_policy'] != 30]
     data = data[data['instant_bookable'] != 30]
+
 
     # Adding a column for legality warning (Based on sources)
     query = (data['minimum nights'] <= 30.0) & (data['room type'] == 'Entire home/apt')
@@ -175,7 +176,6 @@ def import_airbnb():
     data = data.rename({'price':'PRICE','service_fee':'SERVICE FEE','minimum_nights':'MINIMUM NIGHTS','Construction_year':'CONSTRUCTION YEAR','number_of_reviews':'NUMBER OF REVIEWS','calculated_host_listings_count':'NUMBER OF HOST LISTINGS',
                         'host_identity_verified':'HOST IDENTITY','neighbourhood_group':'BOROUGH','cancellation_policy':'CANCELLATION POLICY','instant_bookable':'INSTANTLY BOOKABLE','room_type':'ROOM TYPE'},axis=1)
 
-    print(data['BOROUGH'].unique())
     return data
 
 
@@ -396,9 +396,9 @@ class Map():
         fig = px.density_mapbox(data, lat='lat', lon='long', opacity=0.6, radius=15,
                                 center=dict(lat=40.7, lon=-74), zoom=8,
                                 mapbox_style="open-street-map",
-                                custom_data = ['properties.PRICE', 'properties.ROOM TYPE', 'properties.legality'])
+                                custom_data = ['properties.PRICE', 'properties.ROOM TYPE', 'properties.legality', 'properties.BOROUGH','properties.CONSTRUCTION YEAR','properties.SERVICE FEE','properties.MINIMUM NIGHTS','properties.NUMBER OF REVIEWS'])
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0}, uirevision='0')
-        fig.update_traces(hovertemplate='Latitude: %{lat} <br>Longitude: %{lon} <br>Price: %{customdata[0]} <br>Room Type: %{customdata[1]} <br>Legality Warning: %{customdata[2]}')
+        fig.update_traces(hovertemplate='Borough: %{customdata[3]} <br>Construction year: %{customdata[4]} <br>Price: $%{customdata[0]} <br>Service Fee: $%{customdata[5]} <br>Minimum Nights: %{customdata[6]} <br>Room Type: %{customdata[1]} <br>Number of Reviews: %{customdata[7]} <br>Legality Warning: %{customdata[2]}')
         return fig
 
     def geojson_to_df(self, data):

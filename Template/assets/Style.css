@@ -75,9 +75,9 @@ hr {
     flex-direction: column;
     min-height: 100vh;
 	max-height:100vh;
-	overflow:auto;
+	overflow:scroll;
 	margin-left:0.5vw;
-	margin-right:1vw;
+	margin-right:padding-right;
 }
 #middle-column {
     display:block;
@@ -90,14 +90,14 @@ hr {
 
 #right-column {
     padding: 0px 0rem;
-	width:14vw;
+	width:15vw;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     max-height:100vh;
-    overflow:auto;
-    margin-left:0.5vw;
-    margin-right:0.5vw;
+    overflow:scroll;
+    margin-left:1vw;
+    margin-right:padding-right;
 }
 
 
