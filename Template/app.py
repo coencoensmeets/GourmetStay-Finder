@@ -173,7 +173,6 @@ if __name__ == '__main__':
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 
-
 		#Change of filter (Restaurants)
 		if (id_input == 'res_filter_graph') and ('xaxis.range' in layout_graph_res.keys()):
 			print("Restaurant filter UPDATE")
@@ -183,7 +182,6 @@ if __name__ == '__main__':
 			mean_price = "Average Price: ${}".format(Count[1])
 			mean_service = "Average Service Fee: ${}".format(Count[2])
 			Map_data_list = Map_data.update()
-
 		#Change of filter (Airbnb)
 		if (id_input == 'air_filter_graph') and ('xaxis.range' in layout_graph_air.keys()):
 			print("Airbnb filter UPDATE")
@@ -287,14 +285,13 @@ if __name__ == '__main__':
 				  [Input("markers", "hover_feature"), #Input when a feature is hovered over
 		 		   Input("markers", "click_feature")]) #Input when a feature is clicked on
 	def update_tooltip(hover_feature,click_feature):
-		
-		if hover_feature is None and click_feature is None:
-			return 'Hover over data to see its information', 'Click on data to save for comparison', None  # return last information and no tooltip
-		elif hover_feature == click_feature:
+		#if Data_saved.hoverData is None and Data_saved.clickData is None:
+		#	return 'Hover over data to see its information', 'Click on data to save for comparison', None  # return last information and no tooltip
+		if hover_feature == click_feature:
 			return Data_saved.hoverData, Data_saved.clickData, Data_saved.clickData[0:4]
 		if click_feature is None or (click_feature != hover_feature and hover_feature is not None):
 			if hover_feature['properties']['cluster'] == True:  # Check whether the feature is a cluster
-				return 'Hover over data to see its information', 'Click on data to save for comparison', [
+				return Data_saved.hoverData, Data_saved.clickData, [
 					html.P('#N={}'.format(hover_feature['properties']['point_count']))]  # Returns cluster information
 			elif Map_data.Show == 'Restaurants':  # Restaurant map is shown
 				# Creates the html for the information
@@ -316,10 +313,7 @@ if __name__ == '__main__':
 						])]
 				# print(feature)
 				Data_saved.update_hover(Output)  # update last hover feature
-				if click_feature is None:
-					return Data_saved.hoverData, 'Click on data to save for comparison', Data_saved.hoverData[0:4]
-				else:
-					return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
+				return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
 			else:  # Airbnb map is shown
 				# Creates the html for the information
 				Output = [
@@ -339,10 +333,8 @@ if __name__ == '__main__':
 					html.P("Room Type: {}".format(hover_feature['properties']['ROOM TYPE']))
 				]
 				Data_saved.update_hover(Output)  # Updates last hover feature
-				if click_feature is None:
-					return Data_saved.hoverData, 'Click on data to save for comparison', Data_saved.hoverData[0:4]
-				else:
-					return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
+
+				return Data_saved.hoverData, Data_saved.clickData, Data_saved.hoverData[0:4]
 		else:
 			if click_feature['properties']['cluster'] == True:  # Check whether the feature is a cluster
 				return Data_saved.hoverData, Data_saved.clickData, [

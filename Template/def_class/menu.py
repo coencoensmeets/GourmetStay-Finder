@@ -60,7 +60,8 @@ def generate_description_card():
 	)
 
 def generate_control_card(html_filtering):
-	imp_list = html.Ul(id='my-list', children=[html.Li('Due to Plotly limitations, the range sliders reset when switching between variables'),html.Li("The histograms don't take into account the data filtered by categorical filters"),html.Li('Improvement 1')])
+	imp_list_filt = html.Ul(id='my-list', children=[html.Li('Due to Plotly limitations, the range sliders reset when switching between variables'),html.Li("The histograms don't take into account the data filtered by categorical filters"),
+													html.Li('Interconnectivity of the app runs on a callback with multiple inputs, leading to multiple fires, slowing down filtering process')])
 
 	return html.Div(
 		id="control-card",
@@ -68,7 +69,7 @@ def generate_control_card(html_filtering):
 			html.Hr(style = {'width':'100%','height':'2px', 'border-width':'0', 'color':'gray', 'background-color':'gray'}),
 			html.H4("Controls"),
 			*html_filtering,
-			create_popover("Improvements", "Filter improvements", imp_list),
+			create_popover("Improvements", "Filter improvements", imp_list_filt),
 			html.Hr(style = {'width':'100%','height':'2px', 'border-width':'0', 'color':'gray', 'background-color':'gray'}),
 			html.H5("TOGGLE: Normal - Advanced Section"),
 			html.Div('Use the Parallel Coordinate Plot (PCP) for Multivariate Filtering', style = {'font-weight':'bold', 'font-style':'italic'}),

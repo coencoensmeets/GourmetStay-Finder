@@ -231,9 +231,10 @@ class Map():
         patterns = [dict(offset='0', repeat='10', dash=dict(pixelSize=0))]
         self.inner_ring = dl.PolylineDecorator(children=polygon, patterns=patterns)
 
-        imp_list = html.Ul(id='list', children=[html.Li('Make the cluster colours equiluminance'), html.Li(
-            'Be able to select Airbnbs to maintain within the restaurant graph.'),
-                                                html.Li('Visually separate the selected datapoints on the map')])
+        imp_list_vis = html.Ul(id='list', children=[
+            html.Li('Make the cluster colours equiluminance'),
+            html.Li('Be able to select Airbnbs to maintain within the restaurant graph.'),
+            html.Li('Visually separate the selected datapoints on the map')])
         # Creation of the html div for the entire middle part.
         self.html_div = [
             html.Div(
@@ -264,7 +265,7 @@ class Map():
                         html.Button('Show Airbnbs', id='btn-switch', n_clicks=0,
                                     style={'border-color': 'black', 'color': 'black', 'z-index': '3'}),
                     ]),
-                    create_popover("Improvements", "Filter improvements", imp_list,
+                    create_popover("Improvements", "Visual improvements", imp_list_vis,
                                    style_button={'border-color': 'black', 'color': 'black', 'z-index': '3'},
                                    id_text='impr_map'),
                 ],
@@ -318,21 +319,20 @@ class Map():
 
     def get_adv_graphs(self):
         imp_list_pcp = html.Ul(children=[
-            html.Li('Improvement 1'),
-            html.Li('Improvement 1'),
-            html.Li('Improvement 1')])
+            html.Li('Plotly library for parallel coordinates plots (PCP), is not optimized for large data, creates a bottleneck for filtering'),
+            html.Li('Plotly library for parallel coordinates plots (PCP), lacks options for opacity and clustering')])
+
 
         imp_list_dens = html.Ul(children=[
-            html.Li('The "airbnb in visible region" maintains the viewport of the normal map not the density map.'),
-            html.Li('Improvement 1'),
-            html.Li('Improvement 1')])
+            html.Li('The "airbnb in visible region" maintains the viewport of the normal map not the density map.')])
+
 
         return [dcc.Graph(figure=self.get_fig_pcp(), id='pcp_id', style={'height': '50vh'}),
                 dcc.Graph(figure=self.get_fig_map(), id='density_map', style={'height': '50vh'}),
-                create_popover("Improvements", "Filter improvements", imp_list_pcp,
+                create_popover("Improvements", "PCP improvements", imp_list_pcp,
                                style_button={'border-color': 'black', 'color': 'black', 'z-index': '10000'},
                                id_text='impr_pcp'),
-                create_popover("Improvements", "Filter improvements", imp_list_dens,
+                create_popover("Improvements", "Density plot improvements", imp_list_dens,
                                style_button={'border-color': 'black', 'color': 'black', 'z-index': '10000'},
                                id_text='impr_dens'), ]
 

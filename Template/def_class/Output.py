@@ -19,8 +19,10 @@ def generate_output():
         children=[
             html.Hr(style = {'height':'2px', 'border-width':'0', 'color':'gray', 'background-color':'gray'}),
             #Restaurant Data
+            html.H5('Hover over data to see its information'),
             html.Div(id='Information_hover'),
             html.Hr(),
+            html.H5('Click on data to save for comparison'),
             html.Div(id='Information_click'),
             html.Hr(style = {'height':'2px', 'border-width':'0', 'color':'gray', 'background-color':'gray'}),
             html.H5("AIRBNBs in the visible region:"),
