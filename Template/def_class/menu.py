@@ -49,7 +49,7 @@ def generate_description_card():
 	return html.Div(
 		id="description-card",
 		children=[
-			html.H5("NEW YORK MAPS (add name)", style ={'font-weight':'bold'}),
+			html.H5("NEW YORK MAPS JBI100 Visualization", style ={'font-weight':'bold'}),
 			html.H4("Group 44", style={'font-weight':'bold','margin-bottom':'0rem'}),
 			# html.Div(
 			# 	className="intro",
